@@ -8,7 +8,7 @@ graph TD
         FE["GitHub Pages + JS"]
     end
 
-    subgraph Tier 2 - Aplicação
+    subgraph Tier 2 - Application
         API["Python + FastAPI"]
         FBSDK["firebase_admin"]
         GRPC_CLIENT["gRPC client"]
@@ -20,7 +20,7 @@ graph TD
         FS["Firestore"]
     end
 
-    subgraph RecEngine["Tier 3 - Sistema de Recomendação"]
+    subgraph RecEngine["Tier 3 - Recommendation Engine"]
         REC["gRPC server (Python)\nPyTorch"]
     end
 

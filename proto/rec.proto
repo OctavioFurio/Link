@@ -1,0 +1,27 @@
+syntax = "proto3";
+package rec;
+
+service Recommender {
+  rpc GetContentFeed (FeedRequest) returns (FeedResponse);
+  rpc GetUserSuggestions (UserRequest) returns (UserResponse);
+}
+
+message FeedRequest {
+  string user_id = 1;
+  int32 top_k = 2;
+}
+
+message FeedResponse {
+  repeated string post_ids = 1;
+  repeated float scores = 2;
+}
+
+message UserRequest {
+  string user_id = 1;
+  int32 top_k = 2;
+}
+
+message UserResponse {
+  repeated string user_ids = 1;
+  repeated float scores = 2;
+}

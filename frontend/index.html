@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SocialNet</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav class="topbar">
+    <span class="logo">Link</span>
+    <div class="nav-actions">
+      <input id="search-input" type="text" placeholder="Search users" />
+      <button id="search-btn">Search</button>
+      <button id="profile-btn">Profile</button>
+    </div>
+  </nav>
+
+  <main class="layout">
+    <aside class="sidebar" id="suggestions-panel">
+      <h3>Who to follow</h3>
+      <ul id="suggestions-list"></ul>
+    </aside>
+
+    <section class="feed" id="feed-panel">
+      <div class="compose">
+        <textarea id="post-input" placeholder="What's on your mind?"></textarea>
+        <button id="post-btn">Post</button>
+      </div>
+      <div id="posts-container"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="app.js"></script>
+</body>
+</html>

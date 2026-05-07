@@ -1,3 +1,4 @@
 backend/.env
 rec-engine/.env
 *.env
+.vscode

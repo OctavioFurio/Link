@@ -5,7 +5,7 @@ Coursework for distributed systems and web development lectures, implementing a 
 ```mermaid
 graph TD
     subgraph Tier 1 - Frontend
-        FE["GitHub Pages + JS puro"]
+        FE["GitHub Pages + JS"]
     end
 
     subgraph Tier 2 - Aplicação

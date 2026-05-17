@@ -9,22 +9,6 @@ from google.cloud.firestore_v1.transforms import Increment
 from typing import cast
 import uuid, os
 
-
-# Test, remove later  --------------------
-
-print("Running main...")
-
-from datetime import datetime, UTC
-
-doc_ref = db.collection("tests").add({
-    "mensagem": "teste render",
-    "status": "ok",
-    "created_at": datetime.now(UTC)
-})
-
-# ----------------------------------------
-
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,

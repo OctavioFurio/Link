@@ -2,3 +2,5 @@ backend/.env
 rec-engine/.env
 *.env
 .vscode
+venv/
+secrets/

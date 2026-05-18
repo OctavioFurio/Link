@@ -4,13 +4,18 @@
   --border: #292941;
   --accent: #f7d16a;
   --accent-hover: #ffdd8f;
+  --bnt-text: #ffffff;
   --text: #e2e2f0;
   --muted: #779199;
   --radius: 10px;
   --font: 'Segoe UI', system-ui, sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
 body {
   background: var(--bg);
@@ -19,7 +24,7 @@ body {
   min-height: 100vh;
 }
 
-.topbar {
+header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -32,9 +37,18 @@ body {
   z-index: 100;
 }
 
-.logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+.logo { 
+  font-size: 1.25rem; 
+  font-weight: 700; 
+  color: var(--accent); 
+  letter-spacing: 0.05em; 
+}
 
-.nav-actions { display: flex; gap: 0.5rem; align-items: center; }
+.nav-actions { 
+  display: flex; 
+  gap: 0.5rem; 
+  align-items: center; 
+}
 
 input[type="text"], textarea {
   background: var(--bg);
@@ -46,23 +60,25 @@ input[type="text"], textarea {
   outline: none;
   transition: border-color 0.2s;
 }
-input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+input[type="text"]:focus, textarea:focus { 
+  border-color: var(--accent); 
+}
 
 button {
   background: var(--accent);
-  color: #fff;
+  color: var(--bnt-text);
   border: none;
   border-radius: var(--radius);
   padding: 0.45rem 1rem;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: 0.2s;
 }
 button:hover { background: var(--accent-hover); }
 
 .layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 1fr 260px;
   gap: 1.5rem;
   max-width: 900px;
   margin: 2rem auto;
@@ -78,7 +94,11 @@ button:hover { background: var(--accent-hover); }
   position: sticky;
   top: 72px;
 }
-.sidebar h3 { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+.sidebar h3 { 
+  font-size: 0.85rem; color: var(--muted); 
+  text-transform: uppercase; letter-spacing: 0.08em; 
+  margin-bottom: 0.75rem; 
+}
 .sidebar ul { list-style: none; }
 .sidebar li {
   padding: 0.5rem 0;
@@ -113,8 +133,25 @@ button:hover { background: var(--accent-hover); }
 .post-meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.4rem; }
 .post-content { line-height: 1.5; margin-bottom: 0.75rem; }
 .post-actions { display: flex; gap: 0.5rem; }
-.like-btn { background: transparent; border: 1px solid var(--border); color: var(--text); font-size: 0.8rem; padding: 0.25rem 0.6rem; }
-.like-btn:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
+.like-btn { 
+  background: transparent; 
+  border: 1px solid var(--border); 
+  color: var(--text); 
+  font-size: 0.8rem; 
+  padding: 0.25rem 0.6rem; 
+}
+.like-btn:hover { 
+  border-color: var(--accent); 
+  color: var(--accent); 
+  background: transparent; 
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 1.5rem 1rem;
+  font-size: 0.8rem;
+}
 
 .toast {
   position: fixed;
@@ -122,7 +159,7 @@ button:hover { background: var(--accent-hover); }
   left: 50%;
   transform: translateX(-50%);
   background: var(--accent);
-  color: #fff;
+  color: var(--bnt-text);
   padding: 0.6rem 1.4rem;
   border-radius: 99px;
   font-size: 0.9rem;

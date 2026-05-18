@@ -1,4 +1,4 @@
-const API = "https://YOUR-BACKEND.onrender.com";  // ← update after Render deploy
+const API = "https://link-4lqo.onrender.com";
 
 // Demo user_id (no auth for now)
 let USER_ID = localStorage.getItem("user_id");

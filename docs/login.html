@@ -13,17 +13,44 @@
     <main class="login-content">
         <div class="logo-main">Link</div>
 
-        <div class="field-group">
-            <label for="username-input">Usuário</label>
-            <input id="username-input" type="text" />
-        </div>
+        <div class="forms-wrapper">
+            <form class="login-form" id="signin-form">
+                <h2>Já tenho conta!</h2>
 
-        <div class="field-group">
-            <label for="password-input">Senha</label>
-            <input id="password-input" type="password" />
-        </div>
+                <div class="field-group">
+                    <label for="signin-username-input">Usuário</label>
+                    <input id="signin-username-input" type="text" required />
+                </div>
 
-        <button id="login-btn">Entrar</button>
+                <div class="field-group">
+                    <label for="signin-password-input">Senha</label>
+                    <input id="signin-password-input" type="password" required/>
+                </div>
+
+                <button type="submit" class="login-btn" id="signin-btn">Entrar</button>
+            </form>
+
+            <form class="login-form" id="signup-form">
+                <h2>Ainda não tenho conta...</h2>
+
+                <div class="field-group">
+                    <label for="signup-email-input">Email</label>
+                    <input id="signup-email-input" type="email" required/>
+                </div>
+
+                <div class="field-group">
+                    <label for="signup-username-input">Usuário</label>
+                    <input id="signup-username-input" type="text" required/>
+                </div>
+
+                <div class="field-group">
+                    <label for="signup-password-input">Senha</label>
+                    <input id="signup-password-input" type="password" required/>
+                </div>
+
+                <button type="submit" class="login-btn" id="signup-btn">Cadastrar</button>
+            </form>
+        </div>
     </main>
 
     <footer>

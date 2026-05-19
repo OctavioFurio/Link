@@ -5,7 +5,7 @@ import os, json
 def _init():
     if firebase_admin._apps:
         return
-    # set env's FIREBASE_SERVICE_ACCOUNT as JSON
+
     sa = json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT"])
     cred = credentials.Certificate(sa)
     firebase_admin.initialize_app(cred)

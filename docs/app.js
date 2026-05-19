@@ -25,22 +25,41 @@ async function loadFeed() {
     const container = document.getElementById("posts-container");
     container.innerHTML = `
         <p style='color:var(--muted-text-color);padding:1rem'>Carregando…</p>`;
-    const posts = 
-        await fetch(`${API}/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`).then(r => r.json());
-    container.innerHTML = "";
-    if (!posts.length) { 
+
+    try {
+        const posts = 
+            await fetch(`${API}/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`).then(r => r.json());
+        container.innerHTML = "";
+
+        if (!posts.length) { 
+            container.innerHTML = `
+                <p style='color:var(--muted-text-color);padding:1rem'>Sem postagens ainda.</p>`;
+            return; 
+        }
+
+        const postElementsPromises = posts.map(post => renderPost(post));
+        const postElements = await Promise.all(postElementsPromises);
+        postElements.forEach(post => container.appendChild(post));
+    } catch (error) {
+        console.error("Fail to load feed:", error);
         container.innerHTML = `
-            <p style='color:var(--muted-text-color);padding:1rem'>No posts yet.</p>`;
-        return; 
+            <p style='color:var(--muted-text-color);padding:1rem'>Erro ao carregar postagens.</p>`;
     }
-    posts.forEach(post => container.appendChild(renderPost(post)));
 }
 
-function renderPost(post) {
+async function renderPost(post) {
+    let username = post.user_id;
+    try {
+        const userData = await fetch(`${API}/users/${post.user_id}`).then(r => r.json());
+        username = userData.username; 
+    } catch (error) {
+        console.error(`Fail to search user ${post.user_id}:`, error);
+    }
+
     const card = document.createElement("article");
     card.className = "post-card";
     card.innerHTML = `
-        <div class="post-meta">${post.user_id}</div>
+        <div class="post-meta">${username}</div>
         <div class="post-content">${escHtml(post.content)}</div>
         <div class="post-actions">
             <button class="like-btn" data-id="${post.post_id}">♥ Curtir</button>
@@ -52,7 +71,7 @@ function renderPost(post) {
 async function likePost(post_id, card) {
     await fetch(`${API}/posts/${post_id}/like?user_id=${USER_ID}`, { method: "POST" });
     const btn = card.querySelector(".like-btn");
-    btn.classList.add(".liked-btn");
+    btn.classList.add("liked-btn");
     btn.style.background = "var(--main-color)";
     btn.style.color = "var(--foreground-color)";
     btn.textContent = "♥ Curtiu!";

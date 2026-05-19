@@ -57,7 +57,7 @@ nav {
     align-items: center; 
 }
 
-input[type="text"], input[type="password"], textarea {
+input, textarea {
     background: var(--background-color);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
@@ -67,7 +67,7 @@ input[type="text"], input[type="password"], textarea {
     outline: none;
     transition: border-color 0.2s;
 }
-input[type="text"]:focus, input[type="password"]:focus, textarea:focus { 
+input:focus, textarea:focus { 
     border-color: var(--main-color); 
 }
 
@@ -87,7 +87,12 @@ button:hover { background: var(--main-color-hover); }
 .field-group {
     display: flex;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
+}
+
+.login-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .field-group label {
@@ -95,9 +100,9 @@ button:hover { background: var(--main-color-hover); }
     flex-shrink: 0;
 }
 
-#login-btn {
+.login-btn {
     width: 20rem;
-    margin-top: 1rem;
+    margin-top: auto;
 }
 
 .login-content {
@@ -110,6 +115,27 @@ button:hover { background: var(--main-color-hover); }
     align-items: center;
 
     gap: 10px;
+}
+
+.forms-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.login-form {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form + .login-form {
+    border-left: 2px solid var(--border-color);
+    padding-left: 40px;
 }
 
 .main-content {
@@ -209,4 +235,15 @@ footer {
 @media (max-width: 640px) {
     .layout { grid-template-columns: 1fr; }
     .sidebar { display: none; }
+
+        .forms-wrapper {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .login-form + .login-form {
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        padding-left: 20px;
+        padding-top: 40px;
+    }
 }

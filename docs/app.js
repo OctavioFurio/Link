@@ -71,9 +71,7 @@ async function renderPost(post) {
 async function likePost(post_id, card) {
     await fetch(`${API}/posts/${post_id}/like?user_id=${USER_ID}`, { method: "POST" });
     const btn = card.querySelector(".like-btn");
-    btn.classList.add("liked-btn");
-    btn.style.background = "var(--main-color)";
-    btn.style.color = "var(--foreground-color)";
+    btn.classList.add("button-selected");
     btn.textContent = "♥ Curtiu!";
     toast("Curtido!");
 }

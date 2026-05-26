@@ -51,11 +51,6 @@ header {
     color: var(--main-color);
     font-size: var(--font-size-large);
 }
-/* .logo-large { 
-    font-weight: 700;
-    color: var(--main-color); 
-    font-size: var(--font-size-giant);
-} */
 
 input, textarea {
     padding: 0.45rem 0.75rem;
@@ -97,60 +92,6 @@ button:active,
     background: var(--border-color);
     border: 1px solid var(--border-color);
 }
-
-/* .field-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.login-form h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.field-group label {
-    width: 80px;
-    flex-shrink: 0;
-}
-
-.login-btn {
-    width: 20rem;
-    margin-top: auto;
-}
-
-.login-content {
-    height: 90vh;
-
-    display: flex;
-    flex-direction: column;
-
-    justify-content: center;
-    align-items: center;
-
-    gap: 10px;
-}
-
-.forms-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    gap: 40px;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.login-form {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-.login-form + .login-form {
-    border-left: 2px solid var(--border-color);
-    padding-left: 40px;
-} */
 
 main { min-height: 100vh; }
 
@@ -294,6 +235,66 @@ footer {
     opacity: 0; 
     pointer-events: none; 
 }
+
+/* .logo-large { 
+    font-weight: 700;
+    color: var(--main-color); 
+    font-size: var(--font-size-giant);
+} */
+
+/* .field-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.login-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.field-group label {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.login-btn {
+    width: 20rem;
+    margin-top: auto;
+}
+
+.login-content {
+    height: 90vh;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.forms-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.login-form {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form + .login-form {
+    border-left: 2px solid var(--border-color);
+    padding-left: 40px;
+} */
 
 @media (max-width: 640px) {
     /* .layout { grid-template-columns: 1fr; }

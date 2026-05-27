@@ -25,7 +25,7 @@ class PostIn(BaseModel):
 
 class UserIn(BaseModel):
     username: str
-    bio: str = ""
+    hashed_password: str
 
 # Users
 @app.post("/users")
@@ -33,7 +33,7 @@ def create_user(body: UserIn):
     uid = str(uuid.uuid4())
     db.collection("users").document(uid).set({
         "username": body.username,
-        "bio": body.bio,
+        "hashed_password": body.hashed_password,
         "created_at": SERVER_TIMESTAMP,
     })
     return {"user_id": uid}
@@ -79,12 +79,6 @@ def get_post(post_id: str):
 def like_post(post_id: str, user_id: str):
     ref = db.collection("posts").document(post_id)
     ref.update({"likes": Increment(1)})
-    db.collection("interactions").add({
-        "user_id": user_id,
-        "post_id": post_id,
-        "type": "like",
-        "created_at": SERVER_TIMESTAMP,
-    })
     return {"ok": True}
 
 # Recommendations

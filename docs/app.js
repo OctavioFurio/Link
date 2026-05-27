@@ -1,22 +1,62 @@
 const API = "https://link-4lqo.onrender.com";
 const TOP_K_FEED = 15;
 const TOP_K_SEARCH = 5;
-
 const TOAST_TIMER_MS = 2000;
-
-// Demo user_id (no auth for now)
-let USER_ID = localStorage.getItem("user_id");
-if (!USER_ID) {
-  fetch(`${API}/users`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: `user_${Math.random().toString(36).slice(2, 7)}` }),
-  })
-    .then(r => r.json())
-    .then(d => { USER_ID = d.user_id; localStorage.setItem("user_id", USER_ID); loadAll(); });
-} else {
-  loadAll();
+ 
+function apiFetch(path, options) {
+    return fetch(`${API}${path}`, options).then(r => r.json());
 }
+ 
+function escHtml(s) {
+    return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+ 
+function toast(message) {
+    const el = document.getElementById("toast");
+    el.textContent = message;
+    el.classList.remove("hidden");
+    setTimeout(() => el.classList.add("hidden"), TOAST_TIMER_MS);
+}
+
+function setFeedMessage(container, message) {
+  container.innerHTML = `
+    <p style='color:var(--muted-text-color);padding:1rem'>
+        ${message}
+    </p>`;
+}
+
+function setListMessage(list, message) {
+    list.innerHTML = `<li style='color:var(--muted-text-color)'>${message}</li>`;
+}
+
+function renderUserLi(user) {
+    const li = document.createElement("li");
+    li.innerHTML = `
+        <span>${user.username ?? user.user_id}</span>
+        <button class="follow-btn">Seguir</button>`;
+    return li;
+}
+ 
+// Demo user_id (no auth for now)
+let USER_ID = "73aa628f-c8e8-4490-b2d2-2ab92d0c11b7";
+loadAll();
+// let USER_ID = localStorage.getItem("user_id");
+// if (!USER_ID) {
+//   apiFetch("/users", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ username: `user_${Math.random().toString(36).slice(2, 7)}` }),
+//   }).then(d => {
+//     USER_ID = d.user_id;
+//     localStorage.setItem("user_id", USER_ID);
+//     loadAll();
+//   });
+// } else {
+//   loadAll();
+// }
 
 function loadAll() {
     loadFeed();
@@ -25,46 +65,31 @@ function loadAll() {
 
 async function loadFeed() {
     const container = document.getElementById("posts-container");
-
-    container.innerHTML = `
-        <p style='color:var(--muted-text-color);padding:1rem'>
-            Carregando…
-        </p>`;
-
+    setFeedMessage(container, "Carregando...");
+ 
     try {
-        const posts = await fetch(
-            `${API}/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`
-        ).then(r => r.json());
+        const posts = await apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`);
 
         container.innerHTML = "";
-
-        if (!posts.length) { 
-            container.innerHTML = `
-                <p style='color:var(--muted-text-color);padding:1rem'>
-                    Sem postagens ainda.
-                </p>`;
-            return; 
+        if (!posts.length) {
+            setFeedMessage(container, "Sem postagens ainda.");
+            return;
         }
 
-        const postElementsPromises = posts.map(async post => {
-            const userData = await fetch(
-                `${API}/users/${post.user_id}`
-            ).then(r => r.json()); 
+        const postElements = await Promise.all(
+            posts.map(async post => {
+            const userData = await apiFetch(`/users/${post.user_id}`);
+            return renderPost(post, userData.username);
+            })
+        );
 
-           return renderPost(post, userData.username);
-        });
-
-        const postElements = await Promise.all(postElementsPromises);
-        postElements.forEach(post => container.appendChild(post));
+        postElements.forEach(element => container.appendChild(element));
     } catch (error) {
         console.error("Fail to load feed:", error);
-        container.innerHTML = `
-            <p style='color:var(--muted-text-color);padding:1rem'>
-                Falha ao carregar postagens.
-            </p>`;
+        setFeedMessage(container, "Falha ao carregar postagens.");
     }
 }
-
+ 
 function renderPost(post, username) {
     const card = document.createElement("article");
     card.className = "post-card";
@@ -74,122 +99,93 @@ function renderPost(post, username) {
         <div class="post-actions">
             <button class="like-btn" data-id="${post.post_id}">♥ Curtir</button>
         </div>`;
-    card.querySelector(".like-btn").addEventListener("click", () => likePost(post.post_id, card));
+    card.querySelector(".like-btn").addEventListener("click", 
+        () => likePost(post.post_id, card));
     return card;
 }
-
-async function likePost(post_id, card) {
+ 
+async function likePost(postId, card) {
     const btn = card.querySelector(".like-btn");
     btn.classList.add("button-selected");
     btn.textContent = "♥ Curtiu!";
 
     try {
-        await fetch(`${API}/posts/${post_id}/like?user_id=${USER_ID}`, { method: "POST" });
+        await apiFetch(`/posts/${postId}/like?user_id=${USER_ID}`, { method: "POST" });
         toast("Curtido!");
     } catch (error) {
-        console.error(`Fail to like post ${post_id}:`, error);
+        console.error(`Fail to like post ${postId}:`, error);
         btn.classList.remove("button-selected");
         btn.textContent = "♥ Curtir";
     }
 }
-
-document.getElementById("post-btn").addEventListener("click", async () => {
+ 
+async function handleNewPost() {
     const input = document.getElementById("post-input");
     const content = input.value.trim();
     if (!content) return;
 
     try {
-        await fetch(`${API}/posts`, {
+        await apiFetch("/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ user_id: USER_ID, content }),
         });
-
         input.value = "";
         toast("Publicado!");
         loadFeed();
     } catch (error) {
-        console.error(`Fail to post:`, error);
+        console.error("Fail to post:", error);
         toast("Falha ao publicar!");
     }
-});
-
+}
+ 
 async function loadSuggestions() {
     const list = document.getElementById("suggestions-list");
-    
-    list.innerHTML = "<li style='color:var(--muted-text-color)'>Carregando...</li>";
+    setListMessage(list, "Carregando...");
 
-    try{
-        const users = await fetch(`${API}/rec/users/${USER_ID}?top_k=${TOP_K_SEARCH}`)
-            .then(r => r.json());
+    try {
+        const users = await apiFetch(`/rec/users/${USER_ID}?top_k=${TOP_K_SEARCH}`);
 
         list.innerHTML = "";
-        if (!users.length){
-            list.innerHTML = "<li style='color:var(--muted-text-color)'>Sem resultados.</li>";
+        if (!users.length) {
+            setListMessage(list, "Sem resultados.");
             return;
         }
 
-        users.forEach(user => {
-            const li = document.createElement("li");
-            li.innerHTML = `
-                <span>${user.username ?? user.user_id}</span>
-                <button class="follow-btn">Seguir</button>`;
-            list.appendChild(li);
-        });
+        users.forEach(user => list.appendChild(renderUserLi(user)));
     } catch (error) {
-        console.error(`Fail to load suggestions:`, error);
-        list.innerHTML = "<li style='color:var(--muted-text-color)'>Sem resultados.</li>";
+        console.error("Fail to load suggestions:", error);
+        setListMessage(list, "Falha ao carregar sugestões!");
     }
 }
-
-document.getElementById("search-btn").addEventListener("click", async () => {
+ 
+async function handleSearch() {
     const query = document.getElementById("search-input").value.trim();
     if (!query) return;
 
     const list = document.getElementById("suggestions-list");
     const panel = document.getElementById("suggestions-panel");
-
     panel.querySelector("h3").textContent = `Resultados para "${query}"`;
-    list.innerHTML = "<li style='color:var(--muted-text-color)'>Buscando...</li>";
+    setListMessage(list, "Buscando...");
 
     try {
-        const users = await fetch(`${API}/users/search/${encodeURIComponent(query)}`)
-            .then(r => r.json());
+        const users = await apiFetch(`/users/search/${encodeURIComponent(query)}`);
 
         list.innerHTML = "";
-        if (!users.length) { 
-            list.innerHTML = "<li style='color:var(--muted-text-color)'>Sem resultados.</li>";
+        if (!users.length) {
+            setListMessage(list, "Sem resultados.");
             toast("Nenhum usuário encontrado!");
-            return; 
+            return;
         }
-        users.forEach(user => {
-            const li = document.createElement("li");
-            li.innerHTML = `
-                <span>${user.username ?? user.user_id}</span>
-                <button class="follow-btn">Seguir</button>`;
-            list.appendChild(li);
-        });
 
+        users.forEach(user => list.appendChild(renderUserLi(user)));
         toast("Usuários encontrados!");
     } catch (error) {
-        console.error(`Fail to search users:`, error);
-        list.innerHTML = "<li style='color:var(--muted-text-color)'>Sem resultados.</li>";
+        console.error("Fail to search users:", error);
+        setListMessage(list, "Sem resultados.");
         toast("Falha ao procurar usuários!");
     }
-});
-
-function escHtml(s) {
-    return s
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;");
 }
-
-function toast(message) {
-    const toast = document.getElementById("toast");
-
-    toast.textContent = message;
-    toast.classList.remove("hidden");
-
-    setTimeout(() => toast.classList.add("hidden"), TOAST_TIMER_MS);
-}
+ 
+document.getElementById("post-btn").addEventListener("click", handleNewPost);
+document.getElementById("search-btn").addEventListener("click", handleSearch);

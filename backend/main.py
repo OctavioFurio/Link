@@ -82,9 +82,7 @@ def get_post(post_id: str):
 
 @app.post("/posts/{post_id}/like")
 def like_post(post_id: str, user_id: str):
-    db.collection("posts")
-        .document(post_id)
-        .update({"likes": Increment(1)})
+    db.collection("posts").document(post_id).update({"likes": Increment(1)})
     return {"ok": True}
 
 @app.get("/rec/feed/{user_id}")
@@ -92,9 +90,7 @@ def rec_feed(user_id: str, top_k: int = 10):
     try:
         post_ids = get_feed(user_id, top_k)
     except Exception:
-        docs = db.collection("posts")
-            .order_by("created_at", direction="DESCENDING")
-            .limit(top_k).stream()
+        docs = db.collection("posts").order_by("created_at", direction="DESCENDING").limit(top_k).stream()
         post_ids = [d.id for d in docs]
 
     posts = []

@@ -1,24 +1,27 @@
+import uuid
+
+from typing import cast
+from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+
 from firebase_client import db
-from rec_client import get_feed, get_user_suggestions
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.transforms import Increment
-from typing import cast
-import uuid, os
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+
+from rec_client import get_feed, get_user_suggestions
 
 app = FastAPI()
+
+# TODO: LIMITAR!!!
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],    # TODO: Limit later
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Toy model
-# TODO: Maybe use Firebase Auth instead?
 class PostIn(BaseModel):
     user_id: str
     content: str
@@ -27,7 +30,6 @@ class UserIn(BaseModel):
     username: str
     hashed_password: str
 
-# Users
 @app.post("/users")
 def create_user(body: UserIn):
     uid = str(uuid.uuid4())
@@ -40,7 +42,9 @@ def create_user(body: UserIn):
 
 @app.get("/users/{user_id}")
 def get_user(user_id: str):
-    doc = cast(DocumentSnapshot, db.collection("users").document(user_id).get())
+    doc = cast(
+        DocumentSnapshot, 
+        db.collection("users").document(user_id).get())
     if not doc.exists:
         raise HTTPException(404)
     return {"user_id": user_id} | (doc.to_dict() or {})
@@ -56,7 +60,6 @@ def search_users(query: str):
     )
     return [{"user_id": d.id} | (d.to_dict() or {}) for d in results]
 
-# Posts
 @app.post("/posts")
 def create_post(body: PostIn):
     pid = str(uuid.uuid4())
@@ -70,28 +73,35 @@ def create_post(body: PostIn):
 
 @app.get("/posts/{post_id}")
 def get_post(post_id: str):
-    doc = cast(DocumentSnapshot, db.collection("posts").document(post_id).get())
+    doc = cast(
+        DocumentSnapshot, 
+        db.collection("posts").document(post_id).get())
     if not doc.exists:
         raise HTTPException(404)
     return {"post_id": post_id} | (doc.to_dict() or {})
 
 @app.post("/posts/{post_id}/like")
 def like_post(post_id: str, user_id: str):
-    ref = db.collection("posts").document(post_id)
-    ref.update({"likes": Increment(1)})
+    db.collection("posts")
+        .document(post_id)
+        .update({"likes": Increment(1)})
     return {"ok": True}
 
-# Recommendations
 @app.get("/rec/feed/{user_id}")
 def rec_feed(user_id: str, top_k: int = 10):
     try:
         post_ids = get_feed(user_id, top_k)
     except Exception:
-        docs = db.collection("posts").order_by("created_at", direction="DESCENDING").limit(top_k).stream()
+        docs = db.collection("posts")
+            .order_by("created_at", direction="DESCENDING")
+            .limit(top_k).stream()
         post_ids = [d.id for d in docs]
+
     posts = []
     for pid in post_ids:
-        doc = cast(DocumentSnapshot, db.collection("posts").document(pid).get())
+        doc = cast(
+            DocumentSnapshot, 
+            db.collection("posts").document(pid).get())
         if doc.exists:
             posts.append({"post_id": pid} | (doc.to_dict() or {}))
     return posts
@@ -103,9 +113,12 @@ def rec_users(user_id: str, top_k: int = 5):
     except Exception:
         docs = db.collection("users").limit(top_k).stream()
         user_ids = [d.id for d in docs]
+
     users = []
     for uid in user_ids:
-        doc = cast(DocumentSnapshot, db.collection("users").document(uid).get())
+        doc = cast(
+            DocumentSnapshot, 
+            db.collection("users").document(uid).get())
         if doc.exists:
             users.append({"user_id": uid} | (doc.to_dict() or {}))
     return users

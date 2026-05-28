@@ -132,6 +132,7 @@ async function handleNewPost() {
             body: JSON.stringify({ user_id: USER_ID, content }),
         });
         input.value = "";
+        input.dispatchEvent(new Event("input"));
         toast("Publicado!");
         loadFeed();
     } catch (error) {
@@ -192,7 +193,9 @@ document.getElementById("post-btn").addEventListener("click", handleNewPost);
 document.getElementById("search-btn").addEventListener("click", handleSearch);
 
 const composeTextarea = document.getElementById("post-input");
-composeTextarea.addEventListener("input", () => {
+composeTextarea.addEventListener("input", handleInputCounter);
+
+function handleInputCounter() {
     const currentLength = composeTextarea.value.length;
     const charCount = document.getElementById("compose-count");
     charCount.textContent = `${currentLength}/${MAX_POST_LEN}`;
@@ -205,4 +208,4 @@ composeTextarea.addEventListener("input", () => {
         charCount.style.color = "var(--muted-text-color)";
         charCount.style.fontWeight = "normal";
     }
-});
+}

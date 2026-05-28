@@ -1,26 +1,6 @@
-const API = "https://link-4lqo.onrender.com";
 const TOP_K_FEED = 15;
 const TOP_K_SEARCH = 5;
 const MAX_POST_LEN = 256;
-const TOAST_TIMER_MS = 2000;
- 
-function apiFetch(path, options) {
-    return fetch(`${API}${path}`, options).then(r => r.json());
-}
- 
-function escHtml(s) {
-    return s
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-}
- 
-function toast(message) {
-    const el = document.getElementById("toast");
-    el.textContent = message;
-    el.classList.remove("hidden");
-    setTimeout(() => el.classList.add("hidden"), TOAST_TIMER_MS);
-}
 
 function setFeedMessage(container, message) {
   container.innerHTML = `
@@ -40,23 +20,15 @@ function renderUserLi(user) {
         <button class="follow-btn">Seguir</button>`;
     return li;
 }
- 
-// Demo user_id (no auth for now)
-let USER_ID = "73aa628f-c8e8-4490-b2d2-2ab92d0c11b7";
+
+// TODO
+let userId = "73aa628f-c8e8-4490-b2d2-2ab92d0c11b7"
 loadAll();
-// let USER_ID = localStorage.getItem("user_id");
-// if (!USER_ID) {
-//   apiFetch("/users", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({ username: `user_${Math.random().toString(36).slice(2, 7)}` }),
-//   }).then(d => {
-//     USER_ID = d.user_id;
-//     localStorage.setItem("user_id", USER_ID);
-//     loadAll();
-//   });
+// let userId = localStorage.getItem("user_id");
+// if (!userId) {
+//     window.location.href = "https://octaviofurio.github.io/Link/login.html";
 // } else {
-//   loadAll();
+//     loadAll();
 // }
 
 function loadAll() {
@@ -69,7 +41,7 @@ async function loadFeed() {
     setFeedMessage(container, "Carregando...");
  
     try {
-        const posts = await apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`);
+        const posts = await apiFetch(`/rec/feed/${userId}?top_k=${TOP_K_FEED}`);
 
         container.innerHTML = "";
         if (!posts.length) {
@@ -111,7 +83,7 @@ async function likePost(postId, card) {
     btn.textContent = "♥ Curtiu!";
 
     try {
-        await apiFetch(`/posts/${postId}/like?user_id=${USER_ID}`, { method: "POST" });
+        await apiFetch(`/posts/${postId}/like?user_id=${userId}`, { method: "POST" });
         toast("Curtido!");
     } catch (error) {
         console.error(`Fail to like post ${postId}:`, error);
@@ -129,7 +101,7 @@ async function handleNewPost() {
         await apiFetch("/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: USER_ID, content }),
+            body: JSON.stringify({ user_id: userId, content }),
         });
         input.value = "";
         input.dispatchEvent(new Event("input"));
@@ -146,7 +118,7 @@ async function loadSuggestions() {
     setListMessage(list, "Carregando...");
 
     try {
-        const users = await apiFetch(`/rec/users/${USER_ID}?top_k=${TOP_K_SEARCH}`);
+        const users = await apiFetch(`/rec/users/${userId}?top_k=${TOP_K_SEARCH}`);
 
         list.innerHTML = "";
         if (!users.length) {
@@ -188,12 +160,6 @@ async function handleSearch() {
         toast("Falha ao procurar usuários!");
     }
 }
- 
-document.getElementById("post-btn").addEventListener("click", handleNewPost);
-document.getElementById("search-btn").addEventListener("click", handleSearch);
-
-const composeTextarea = document.getElementById("post-input");
-composeTextarea.addEventListener("input", handleInputCounter);
 
 function handleInputCounter() {
     const currentLength = composeTextarea.value.length;
@@ -209,3 +175,9 @@ function handleInputCounter() {
         charCount.style.fontWeight = "normal";
     }
 }
+ 
+document.getElementById("post-btn").addEventListener("click", handleNewPost);
+document.getElementById("search-btn").addEventListener("click", handleSearch);
+
+const composeTextarea = document.getElementById("post-input");
+composeTextarea.addEventListener("input", handleInputCounter);

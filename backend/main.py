@@ -12,6 +12,8 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 from rec_client import get_feed, get_user_suggestions
 
+MAX_POST_LEN = 256
+
 app = FastAPI()
 
 # TODO: LIMITAR!!!
@@ -65,7 +67,7 @@ def create_post(body: PostIn):
     pid = str(uuid.uuid4())
     db.collection("posts").document(pid).set({
         "user_id": body.user_id,
-        "content": body.content,
+        "content": body.content[:MAX_POST_LEN],
         "created_at": SERVER_TIMESTAMP,
         "likes": 0,
     })

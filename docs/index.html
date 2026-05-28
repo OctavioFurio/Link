@@ -13,7 +13,7 @@
     <header>
         <span class="logo-small">Link</span>
         <nav>
-            <input id="search-input" type="text" placeholder="Buscar usuários" />
+            <input id="search-input" type="text" placeholder="Buscar usuários" maxlength="16" />
             <button id="search-btn">Buscar</button>
             <button id="profile-btn">Perfil</button>
         </nav>
@@ -22,8 +22,11 @@
     <main class="main-content">
         <section class="feed" id="feed-panel">
             <div class="compose">
-                <textarea id="post-input" placeholder="Escreva aqui!"></textarea>
-                <button id="post-btn">Publicar</button>
+                <textarea id="post-input" placeholder="Escreva aqui!" maxlength="256"></textarea>
+                <div class="compose-footer">
+                    <span id="compose-count">0/256</span>
+                    <button id="post-btn">Publicar</button>
+                </div>
             </div>
             <div id="posts-container"></div>
         </section>

@@ -114,7 +114,7 @@ header {
 .main-content {
     gap: 1.5rem;
     display: grid;
-    grid-template-columns: 1fr 260px;
+    grid-template-columns: 1fr 250px;
 
     padding: 0 1rem;
     margin: 2rem auto;
@@ -176,6 +176,17 @@ header {
     resize: none; 
 }
 
+.compose-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#compose-count {
+    color: var(--muted-text-color);
+    font-size: var(--font-size-small);
+}
+
 .compose button { align-self: flex-end; }
 
 .post-card {
@@ -195,6 +206,10 @@ header {
 
 .post-content { 
     margin-bottom: 0.75rem; 
+
+    white-space: normal;
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .post-actions { 

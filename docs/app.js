@@ -1,6 +1,7 @@
 const API = "https://link-4lqo.onrender.com";
 const TOP_K_FEED = 15;
 const TOP_K_SEARCH = 5;
+const MAX_POST_LEN = 256;
 const TOAST_TIMER_MS = 2000;
  
 function apiFetch(path, options) {
@@ -189,3 +190,19 @@ async function handleSearch() {
  
 document.getElementById("post-btn").addEventListener("click", handleNewPost);
 document.getElementById("search-btn").addEventListener("click", handleSearch);
+
+const composeTextarea = document.getElementById("post-input");
+composeTextarea.addEventListener("input", () => {
+    const currentLength = composeTextarea.value.length;
+    const charCount = document.getElementById("compose-count");
+    charCount.textContent = `${currentLength}/${MAX_POST_LEN}`;
+  
+    if (currentLength >= MAX_POST_LEN) {
+        charCount.style.color = "var(--main-color)";
+        charCount.style.fontWeight = "bold";
+    } 
+    else {
+        charCount.style.color = "var(--muted-text-color)";
+        charCount.style.fontWeight = "normal";
+    }
+});

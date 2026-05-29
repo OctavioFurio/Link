@@ -300,17 +300,6 @@ footer {
 }
 
 @media (max-width: 640px) {
-    /* .layout { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
-
-        .forms-wrapper {
-        flex-direction: column;
-        gap: 20px;
-    }
-    .login-form + .login-form {
-        border-left: none;
-        border-top: 1px solid var(--border-color);
-        padding-left: 20px;
-        padding-top: 40px;
-    } */
+    .main-content { grid-template-columns: 1fr; }
+    .sidebar, #search-input, #search-btn { display: none; }
 }

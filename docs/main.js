@@ -49,18 +49,24 @@ async function loadFeed() {
             return;
         }
 
-        const postElements = await Promise.all(
-            posts.map(async post => {
-            const userData = await apiFetch(`/users/${post.user_id}`);
-            return renderPost(post, userData.username);
-            })
-        );
+        const postElements = posts.map(post => {
+            const render = renderPost(post, post.temp_username);
+            container.appendChild(render);
+            return render;
+        });
 
-        postElements.forEach(element => container.appendChild(element));
+        posts.forEach(async (post, i) => {
+            const userData = await apiFetch(`/users/${post.user_id}`);
+            updatePostUsername(postElements[i], userData.username);
+        });
     } catch (error) {
         console.error("Fail to load feed:", error);
         setFeedMessage(container, "Falha ao carregar postagens.");
     }
+}
+
+function updatePostUsername(postElement, username) {
+    postElement.querySelector(".post-meta").textContent = username;
 }
  
 function renderPost(post, username) {

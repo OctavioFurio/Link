@@ -1,4 +1,5 @@
 import uuid
+import hashlib
 
 from typing import cast
 from pydantic import BaseModel
@@ -24,32 +25,77 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class PostIn(BaseModel):
     user_id: str
     content: str
+    temp_username: str
+
 
 class UserIn(BaseModel):
     username: str
     hashed_password: str
+
+
+class LoginIn(BaseModel):
+    username: str
+    password: str
+
+
+def _hash(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def _get_user_doc(user_id: str) -> DocumentSnapshot:
+    doc = cast(DocumentSnapshot, db.collection("users").document(user_id).get())
+    if not doc.exists:
+        raise HTTPException(404, "User not found")
+    return doc
+
+
+@app.post("/login")
+def login(body: LoginIn):
+    hashed = _hash(body.password)
+
+    results = list(
+        db.collection("users")
+          .where("username", "==", body.username)
+          .limit(1)
+          .stream()
+    )
+
+    if results:
+        doc = results[0]
+        data = doc.to_dict() or {}
+        if data.get("hashed_password", "") != hashed:
+            raise HTTPException(401, "Wrong password")
+        return {"user_id": doc.id, "username": data["username"], "created": False}
+    
+    uid = str(uuid.uuid4())
+    db.collection("users").document(uid).set({
+        "username": body.username,
+        "hashed_password": hashed,
+        "created_at": SERVER_TIMESTAMP,
+    })
+    return {"user_id": uid, "username": body.username, "created": True}
+
 
 @app.post("/users")
 def create_user(body: UserIn):
     uid = str(uuid.uuid4())
     db.collection("users").document(uid).set({
         "username": body.username,
-        "hashed_password": body.hashed_password,
         "created_at": SERVER_TIMESTAMP,
+        "hashed_password": body.hashed_password,
     })
     return {"user_id": uid}
 
+
 @app.get("/users/{user_id}")
 def get_user(user_id: str):
-    doc = cast(
-        DocumentSnapshot, 
-        db.collection("users").document(user_id).get())
-    if not doc.exists:
-        raise HTTPException(404)
+    doc = _get_user_doc(user_id)
     return {"user_id": user_id} | (doc.to_dict() or {})
+
 
 @app.get("/users/search/{query}")
 def search_users(query: str):
@@ -62,6 +108,7 @@ def search_users(query: str):
     )
     return [{"user_id": d.id} | (d.to_dict() or {}) for d in results]
 
+
 @app.post("/posts")
 def create_post(body: PostIn):
     pid = str(uuid.uuid4())
@@ -73,6 +120,7 @@ def create_post(body: PostIn):
     })
     return {"post_id": pid}
 
+
 @app.get("/posts/{post_id}")
 def get_post(post_id: str):
     doc = cast(
@@ -82,10 +130,12 @@ def get_post(post_id: str):
         raise HTTPException(404)
     return {"post_id": post_id} | (doc.to_dict() or {})
 
+
 @app.post("/posts/{post_id}/like")
 def like_post(post_id: str, user_id: str):
     db.collection("posts").document(post_id).update({"likes": Increment(1)})
     return {"ok": True}
+
 
 @app.get("/rec/feed/{user_id}")
 def rec_feed(user_id: str, top_k: int = 10):
@@ -103,6 +153,7 @@ def rec_feed(user_id: str, top_k: int = 10):
         if doc.exists:
             posts.append({"post_id": pid} | (doc.to_dict() or {}))
     return posts
+
 
 @app.get("/rec/users/{user_id}")
 def rec_users(user_id: str, top_k: int = 5):

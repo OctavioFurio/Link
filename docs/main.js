@@ -1,4 +1,4 @@
-const TOP_K_FEED = 15;
+const TOP_K_FEED = 10;
 const TOP_K_SEARCH = 5;
 const MAX_POST_LEN = 256;
 
@@ -21,15 +21,12 @@ function renderUserLi(user) {
     return li;
 }
 
-// TODO
-let userId = "73aa628f-c8e8-4490-b2d2-2ab92d0c11b7"
-loadAll();
-// let userId = localStorage.getItem("user_id");
-// if (!userId) {
-//     window.location.href = "https://octaviofurio.github.io/Link/login.html";
-// } else {
-//     loadAll();
-// }
+const userId = localStorage.getItem("user_id");
+if (!userId) {
+    window.location.href = "https://octaviofurio.github.io/Link/login.html";
+} else {
+    loadAll();
+}
 
 function loadAll() {
     loadFeed();

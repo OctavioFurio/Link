@@ -30,7 +30,7 @@ async function handleLogin(e) {
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("username", data.username);
  
-        toast(data.created ? "Conta criada! Entrando..." : "Bem-vindo de volta!");
+        toast(data.created ? "Conta criada!" : "Bem-vindo de volta!");
  
         setTimeout(() => {
             window.location.href = "https://octaviofurio.github.io/Link";

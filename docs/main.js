@@ -22,6 +22,7 @@ function renderUserLi(user) {
 }
 
 const userId = localStorage.getItem("user_id");
+const tempUsername = localStorage.getItem("username");
 if (!userId) {
     window.location.href = "https://octaviofurio.github.io/Link/login.html";
 } else {
@@ -104,7 +105,7 @@ async function handleNewPost() {
         await apiFetch("/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: userId, content }),
+            body: JSON.stringify({ user_id: userId, content: content, temp_username:tempUsername }),
         });
         input.value = "";
         input.dispatchEvent(new Event("input"));

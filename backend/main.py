@@ -114,6 +114,7 @@ def create_post(body: PostIn):
     pid = str(uuid.uuid4())
     db.collection("posts").document(pid).set({
         "user_id": body.user_id,
+        "temp_username": body.temp_username,
         "content": body.content[:MAX_POST_LEN],
         "created_at": SERVER_TIMESTAMP,
         "likes": 0,

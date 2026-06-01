@@ -1,5 +1,4 @@
-// TODO
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
  
     const username = document.getElementById("username-input").value.trim();

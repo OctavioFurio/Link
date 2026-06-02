@@ -12,7 +12,6 @@ if (!USER_ID || USER_ID == "undefined") {
     localStorage.removeItem("username");
     window.location.href = `${DOMAIN}/login`;
 } else {
-    localStorage.setItem("username", data.username);
     updateProfBtn();
     loadAll();
 }

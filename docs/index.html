@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,42 +7,72 @@
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
     <header>
-        <img src="Jink.png" alt="Link" class="logo-img" />
-        <nav>
-            <input id="search-input" type="text" placeholder="Buscar usuários" maxlength="16" />
-            <button id="search-btn">Buscar</button>
-            <button id="profile-btn">Perfil</button>
+        <img src="Jink.png" alt="Link — página inicial" class="logo-img" />
+        <nav aria-label="Navegação principal">
+            <div class="search-group" role="search">
+                <label for="search-input" class="sr-only">Buscar usuários</label>
+                <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Buscar usuários…"
+                    maxlength="32"
+                    autocomplete="off"
+                    aria-label="Buscar usuários"
+                />
+                <button id="search-btn" aria-label="Executar busca">Buscar</button>
+            </div>
+            <button id="profile-btn" aria-label="Ver perfil">Perfil</button>
         </nav>
     </header>
 
-    <main class="main-content">
-        <section class="feed" id="feed-panel">
-            <div class="compose">
-                <textarea id="post-input" placeholder="Escreva aqui!" maxlength="256"></textarea>
+    <main class="main-content" id="main">
+        <section class="feed" id="feed-panel" aria-label="Feed de publicações">
+
+            <div class="compose" role="region" aria-label="Nova publicação">
+                <div class="compose-author" id="compose-author" aria-live="polite"></div>
+                <label for="post-input" class="sr-only">Conteúdo da publicação</label>
+                <textarea
+                    id="post-input"
+                    placeholder="O que você está pensando?"
+                    maxlength="256"
+                    aria-describedby="compose-count compose-hint"
+                ></textarea>
                 <div class="compose-footer">
-                    <span id="compose-count">0/256</span>
+                    <span id="compose-count" aria-live="polite" aria-atomic="true">0/256</span>
+                    <span id="compose-hint" class="sr-only">Máximo de 256 caracteres</span>
                     <button id="post-btn">Publicar</button>
                 </div>
             </div>
-            <div id="posts-container"></div>
+
+            <div
+                id="posts-container"
+                aria-label="Publicações"
+                aria-live="polite"
+            ></div>
+
         </section>
 
-        <aside class="sidebar" id="suggestions-panel">
-            <h3>Sugestões</h3>
-            <ul id="suggestions-list"></ul>
+        <aside class="sidebar" id="suggestions-panel" aria-label="Sugestões de usuários">
+            <h2 class="sidebar-heading">Sugestões</h2>
+            <ul id="suggestions-list" aria-label="Lista de sugestões"></ul>
         </aside>
     </main>
 
     <footer>
         <p class="footnote">
-            Feito por Murilo e Octávio exclusivamente para fins acadêmicos.
+            Feito por Murilo e Octávio — fins acadêmicos.
         </p>
     </footer>
 
-    <div id="toast" class="toast hidden"></div>
+    <div
+        id="toast"
+        class="toast hidden"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+    ></div>
 
     <script src="utils.js"></script>
     <script src="main.js"></script>

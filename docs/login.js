@@ -28,11 +28,18 @@ async function handleSubmit(e) {
     btn.textContent = isSignin ? "Entrando..." : "Cadastrando...";
 
     try {
-        const data = await apiFetch(`/${activeAction}`, {
+        const res = await fetch(`${API}/${activeAction}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
         });
+
+        if (!res.ok) {
+            toast(isSignin ? "Usuário ou senha incorreto(s)!" : "Falha, usuário já cadastrado!");
+            return;
+        }
+
+        const data = res.json();
 
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("username", data.username);

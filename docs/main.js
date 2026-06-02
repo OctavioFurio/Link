@@ -33,7 +33,7 @@ function updateProfBtn() {
         profileBtn.textContent = username;
         profileBtn.href = `${DOMAIN}/profile`;
         profileBtn.setAttribute("aria-label", 'Seu perfil.');
-        textBox.innerHTML(`Olá, ${username}! Crie aqui sua próxima publicação!`);
+        textBox.innerHTML = `Olá, ${username}! Crie aqui sua próxima publicação!`;
     }
 }
 

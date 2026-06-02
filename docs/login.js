@@ -31,7 +31,7 @@ async function handleSubmit(e) {
     btn.textContent = isSignin ? "Entrando..." : "Cadastrando...";
 
     try {
-        const res = await fetch(`${API}//auth/${activeAction}`, {
+        const res = await fetch(`${API}/auth/${activeAction}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),

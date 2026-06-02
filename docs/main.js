@@ -23,6 +23,7 @@ function renderUserLi(user) {
 
 const userId = localStorage.getItem("user_id");
 const tempUsername = localStorage.getItem("username");
+
 if (!userId) {
     window.location.href = "https://octaviofurio.github.io/Link/login.html";
 } else {

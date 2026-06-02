@@ -39,7 +39,7 @@ async function handleSubmit(e) {
             return;
         }
 
-        const data = res.json();
+        const data = await res.json();
 
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("username", data.username);

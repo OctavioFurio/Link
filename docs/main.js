@@ -27,11 +27,13 @@ function loadAll() {
 
 function updateProfBtn() {
     const profileBtn = document.getElementById("profile-btn");
+    const textBox = document.getElementById("compose-author");
     const username = localStorage.getItem("username");
     if (username) {
         profileBtn.textContent = username;
         profileBtn.href = `${DOMAIN}/profile`;
         profileBtn.setAttribute("aria-label", 'Seu perfil.');
+        profileBtn.innerHTML(`Olá, ${username}! Crie aqui sua próxima publicação!`);
     }
 }
 

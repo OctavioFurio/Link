@@ -30,8 +30,8 @@ async function loadFeed() {
  
     try {
         const [posts, likedIds] = await Promise.all([
-            apiFetch(`/rec/feed/${userId}?top_k=${TOP_K_FEED}`),
-            apiFetch(`/users/${userId}/likes`),
+            apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`),
+            apiFetch(`/users/${USER_ID}/likes`),
         ]);
         const likedSet = new Set(likedIds);
 

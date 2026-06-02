@@ -4,29 +4,12 @@ Coursework for distributed systems and web development lectures, implementing a 
 ## Deployment & Architecture overview
 ```mermaid
 graph TD
-    subgraph Tier 1 - Frontend
-        FE["GitHub Pages + JS"]
-    end
+    FE[<b>Front-end</b><br><i>HTML/CSS/JS<br>Github Pages] <-->|REST API| API
 
-    subgraph Tier 2 - Application
-        API["Python + FastAPI"]
-        FBSDK["firebase_admin"]
-        GRPC_CLIENT["gRPC client"]
-        API <---> FBSDK
-        API <---> GRPC_CLIENT
-    end
+    API[<b>Aplicação / Back-end</b><br><i>Python + FastAPI]
+    
+    Base[(<b>Banco de Dados</b><br><i>Firebase)]
+    API <-->|Dados| Base
 
-    subgraph Tier 3 - Database
-        FS["Firestore"]
-    end
-
-    subgraph RecEngine["Tier 3 - Recommendation Engine"]
-        REC["gRPC server (Python)\nPyTorch"]
-    end
-
-    FE -->|REST| API
-    API -->|REST Response| FE
-    FBSDK <-->|Firebase Admin SDK| FS
-    GRPC_CLIENT <-->|gRPC| REC
-
+    API <-->|gRPC| ENG[<b>Engine de Recomendação]
 ```

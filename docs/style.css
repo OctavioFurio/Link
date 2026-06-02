@@ -1,10 +1,12 @@
 :root {
-    --background-color: #000014;
-    --foreground-color: #131322;
-    --border-color: #292941;
-    --main-color: #f7d16a;
-    --default-text-color: #e2e2f0;
-    --muted-text-color: #779199;
+    --background-color: #060d1f;
+    --foreground-color: #0d1a3a;
+    --border-color: #1a2f5e;
+    --main-color: #579AF2;
+    --accent-color: #F2EC99;
+    --danger-color: #F26457;
+    --default-text-color: #dce8fb;
+    --muted-text-color: #6b8ab5;
 
     --border-radius: 10px;
 
@@ -25,7 +27,6 @@
 body {
     font-family: var(--font);
     font-size: var(--font-size-medium);
-
     color: var(--default-text-color);
     background: var(--background-color);
 }
@@ -50,31 +51,37 @@ header {
     font-weight: 700; 
     color: var(--main-color);
     font-size: var(--font-size-large);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.logo-img {
+    height: 32px;
+    width: auto;
+    mix-blend-mode: screen;
 }
 
 input, textarea {
     padding: 0.45rem 0.75rem;
-
     color: var(--default-text-color);
     border-radius: var(--border-radius);
     background: var(--background-color);
     border: 1px solid var(--border-color);
-
     transition: 0.2s;
 }
-input:focus, textarea:focus { border-color: var(--main-color); }
+input:focus, textarea:focus { 
+    outline: none;
+    border-color: var(--main-color); 
+    box-shadow: 0 0 0 3px rgba(87, 154, 242, 0.15);
+}
 
 button {
     padding: 0.45rem 1rem;
-
     cursor: pointer;
     font-weight: bold;
-
     color: var(--foreground-color);
     background: var(--main-color);
     border-radius: var(--border-radius);
     border: 1px solid var(--main-color);
-    
     transition: 0.2s;
 }
 button:hover {
@@ -88,28 +95,12 @@ button:hover {
 }
 button:active,
 .button-selected:hover {
-    color: var(--foreground-color);
+    color: var(--default-text-color);
     background: var(--border-color);
     border: 1px solid var(--border-color);
 }
 
 main { min-height: 100vh; }
-
-header {
-    top: 0;
-    z-index: 100;
-    position: sticky;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-
-    height: 56px;
-
-    background: var(--foreground-color);
-    border-bottom: 1px solid var(--border-color);
-}
 
 .main-content {
     gap: 1.5rem;
@@ -118,7 +109,6 @@ header {
 
     padding: 0 1rem;
     margin: 2rem auto;
-
     max-width: 900px;
 }
 
@@ -127,7 +117,6 @@ header {
     position: sticky;
 
     padding: 1rem;
-
     height: fit-content;
 
     background: var(--foreground-color);
@@ -137,18 +126,19 @@ header {
 
 .sidebar h3 { 
     margin-bottom: 0.75rem; 
-
     text-transform: uppercase; 
+    letter-spacing: 0.08em;
+    font-size: var(--font-size-small);
     color: var(--muted-text-color); 
 }
+
+.sidebar ul { list-style: none; }
 
 .sidebar li {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
     padding: 0.5rem 0;
-
     font-size: var(--font-size-small);
     border-bottom: 1px solid var(--border-color);
 }
@@ -166,13 +156,13 @@ header {
     flex-direction: column;
     gap: 0.75rem;
     padding: 1rem;
-
     background: var(--foreground-color);
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
 }
 
 .compose textarea { 
+    width: 100%;
     height: 80px; 
     resize: none; 
 }
@@ -195,13 +185,15 @@ header {
 .post-card {
     padding: 1rem;
     margin: 0.5rem 0;
-
     min-width: 0;
     overflow: hidden;
-
     background: var(--foreground-color);
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
+    transition: border-color 0.2s;
+}
+.post-card:hover {
+    border-color: #1741BF;
 }
 
 .post-meta { 
@@ -212,6 +204,7 @@ header {
 
 .post-content { 
     margin-bottom: 0.75rem; 
+    line-height: 1.55;
     overflow-wrap: break-word;
 }
 
@@ -220,7 +213,24 @@ header {
     gap: 0.5rem; 
 }
 
-.like-btn, .follow-btn { 
+.like-btn { 
+    padding: 0.25rem 0.6rem;
+    font-size: var(--font-size-small);
+    background: transparent;
+    color: var(--muted-text-color);
+    border: 1px solid var(--border-color);
+}
+.like-btn:hover {
+    background: transparent;
+    color: var(--main-color);
+    border-color: var(--main-color);
+}
+.like-btn.liked {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.follow-btn { 
     padding: 0.25rem 0.6rem;
     font-size: var(--font-size-small);
 }
@@ -233,6 +243,9 @@ header {
 footer {
     padding: 1.5rem 0;
     text-align: center;
+    color: var(--muted-text-color);
+    font-size: var(--font-size-small);
+    border-top: 1px solid var(--border-color);
 }
 
 .toast {
@@ -240,21 +253,20 @@ footer {
     left: 50%;
     bottom: 1.5rem;
     position: fixed;
-
     transform: translateX(-50%);
-
     padding: 0.6rem 1.4rem;
-
     font-weight: bold;
     border-radius: 99px;
     background: var(--main-color);
-    color: var(--background-color);
-
+    color: var(--foreground-color);
     transition: opacity 0.3s;
 }
 .toast.hidden { 
     opacity: 0; 
     pointer-events: none; 
+}
+.toast.error {
+    background: var(--danger-color);
 }
 
 .login-content {
@@ -262,7 +274,6 @@ footer {
     align-items: center;
     flex-direction: column;
     justify-content: center;
-
     gap: 24px;
     min-height: 100vh;
 }
@@ -271,6 +282,8 @@ footer {
     font-weight: 700;
     color: var(--main-color); 
     font-size: var(--font-size-giant);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .login-form {
@@ -292,10 +305,27 @@ footer {
     padding-right: 12px;
     white-space: nowrap;
     transform: translateY(-50%);
+    color: var(--muted-text-color);
 }
 
 .login-btn {
     width: 18rem;
+}
+
+.tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 99px;
+    font-size: var(--font-size-small);
+    background: rgba(87, 154, 242, 0.15);
+    color: var(--main-color);
+    border: 1px solid rgba(87, 154, 242, 0.3);
+}
+
+.tag.yellow {
+    background: rgba(242, 236, 153, 0.12);
+    color: var(--accent-color);
+    border-color: rgba(242, 236, 153, 0.25);
 }
 
 @media (max-width: 640px) {

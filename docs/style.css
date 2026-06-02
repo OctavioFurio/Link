@@ -129,6 +129,30 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* Login et cetera */
+a#profile-btn {
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: var(--font);
+    font-size: var(--font-size-medium);
+    color: var(--foreground-color);
+    background: var(--main-color);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--main-color);
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+}
+a#profile-btn:hover {
+    background: transparent;
+    color: var(--main-color);
+}
+
 .btn-ghost {
     background: transparent;
     color: var(--muted-text-color);

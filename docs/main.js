@@ -12,6 +12,8 @@ if (!USER_ID || USER_ID == "undefined") {
     localStorage.removeItem("username");
     window.location.href = `${DOMAIN}/login`;
 } else {
+    localStorage.setItem("username", data.username);
+    updateProfBtn();
     loadAll();
 }
 
@@ -22,6 +24,16 @@ COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
 function loadAll() {
     loadFeed();
     loadSuggestions();
+}
+
+function updateProfBtn() {
+    const profileBtn = document.getElementById("profile-btn");
+    const username = localStorage.getItem("username");
+    if (username) {
+        profileBtn.textContent = username;
+        profileBtn.href = `${DOMAIN}/profile`;
+        profileBtn.setAttribute("aria-label", 'Seu perfil.');
+    }
 }
 
 async function loadFeed() {

@@ -1,4 +1,5 @@
 const API = "https://link-4lqo.onrender.com";
+const DOMAIN = "https://octaviofurio.github.io/Link"
 const TOAST_TIMER_MS = 2000;
 
 function apiFetch(path, options) {

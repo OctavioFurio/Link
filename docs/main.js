@@ -24,8 +24,10 @@ function renderUserLi(user) {
 const userId = localStorage.getItem("user_id");
 const tempUsername = localStorage.getItem("username");
 
-if (!userId) {
-    window.location.href = "https://octaviofurio.github.io/Link/login.html";
+if (!userId || userId == "undefined") {
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("username");
+    window.location.href = `${DOMAIN}/login.html`;
 } else {
     loadAll();
 }

@@ -47,7 +47,7 @@ async function handleSubmit(e) {
         toast(isSignin ? "Bem-vindo de volta!" : "Conta criada!");
 
         setTimeout(() => {
-            window.location.href = "https://octaviofurio.github.io/Link";
+            window.location.href = DOMAIN;
         }, 800);
 
     } catch (error) {

@@ -53,31 +53,43 @@ def _get_user_doc(user_id: str) -> DocumentSnapshot:
     return doc
 
 
-@app.post("/login")
-def login(body: LoginIn):
-    hashed = _hash(body.password)
-
+@app.post("/signin")
+def sigin(body: LoginIn):
     results = list(
         db.collection("users")
           .where("username", "==", body.username)
           .limit(1)
           .stream()
     )
+    if not results:
+        raise HTTPException(404, "User not found")
 
+    doc = results[0]
+    data = doc.to_dict() or {}
+    if data.get("hashed_password") != _hash(body.password):
+        raise HTTPException(401, "Incorrect password")
+
+    return {"user_id": doc.id, "username": data["username"]}
+
+
+@app.post("/signup")
+def signup(body: LoginIn):
+    results = list(
+        db.collection("users")
+          .where("username", "==", body.username)
+          .limit(1)
+          .stream()
+    )
     if results:
-        doc = results[0]
-        data = doc.to_dict() or {}
-        if data.get("hashed_password", "") != hashed:
-            raise HTTPException(401, "Wrong password")
-        return {"user_id": doc.id, "username": data["username"], "created": False}
-    
+        raise HTTPException(409, "Username already in use")
+
     uid = str(uuid.uuid4())
     db.collection("users").document(uid).set({
         "username": body.username,
-        "hashed_password": hashed,
+        "hashed_password": _hash(body.password),
         "created_at": SERVER_TIMESTAMP,
     })
-    return {"user_id": uid, "username": body.username, "created": True}
+    return {"user_id": uid, "username": body.username}
 
 
 @app.post("/users")

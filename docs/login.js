@@ -1,48 +1,54 @@
-async function handleLogin(e) {
+let activeAction = "signin";
+
+document.getElementById("signin-btn").addEventListener("click", () => {
+    activeAction = "signin";
+});
+
+document.getElementById("signup-btn").addEventListener("click", () => {
+    activeAction = "signup";
+});
+
+document.querySelector(".login-form").addEventListener("submit", handleSubmit);
+
+async function handleSubmit(e) {
     e.preventDefault();
- 
+
     const username = document.getElementById("username-input").value.trim();
     const password = document.getElementById("password-input").value;
- 
+
     if (!username || !password) {
         toast("Preencha todos os campos.");
         return;
     }
- 
-    const btn = document.getElementById("signin-btn");
+
+    const isSignin = activeAction === "signin";
+    const btn = document.getElementById(isSignin ? "signin-btn" : "signup-btn");
     btn.disabled = true;
-    btn.textContent = "Entrando...";
- 
+    btn.classList.add("button-selected");
+    btn.textContent = isSignin ? "Entrando..." : "Cadastrando...";
+
     try {
-        const res = await fetch(`${API}/login`, {
+        const data = await apiFetch(`/${activeAction}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
         });
- 
-        const data = await res.json();
- 
-        if (!res.ok) {
-            toast(data?.detail ?? "Erro ao entrar.");
-            return;
-        }
- 
+
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("username", data.username);
- 
-        toast(data.created ? "Conta criada!" : "Bem-vindo de volta!");
- 
+
+        toast(isSignin ? "Bem-vindo de volta!" : "Conta criada!");
+
         setTimeout(() => {
             window.location.href = "https://octaviofurio.github.io/Link";
         }, 800);
- 
+
     } catch (error) {
-        console.error("Login error:", error);
-        toast("Falha ao entrar.");
+        console.error("Auth error:", error);
+        toast(isSignin ? "Falha ao entrar." : "Falha ao Cadastrar.");
     } finally {
         btn.disabled = false;
-        btn.textContent = "Entrar";
+        btn.classList.remove("button-selected");
+        btn.textContent = isSignin ? "Entrar" : "Cadastrar";
     }
 }
- 
-document.querySelector(".login-form").addEventListener("submit", handleLogin);

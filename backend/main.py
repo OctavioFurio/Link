@@ -46,14 +46,14 @@ def _hash(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def _get_user_doc(user_id: str) -> DocumentSnapshot:
-    doc = cast(DocumentSnapshot, db.collection("users").document(user_id).get())
+def _get_doc(id: str, collection: str) -> DocumentSnapshot:
+    doc = cast(DocumentSnapshot, db.collection(collection).document(id).get())
     if not doc.exists:
-        raise HTTPException(404, "User not found")
+        raise HTTPException(404)
     return doc
 
 
-@app.post("/signin")
+@app.post("/auth/signin")
 def sigin(body: LoginIn):
     results = list(
         db.collection("users")
@@ -72,7 +72,7 @@ def sigin(body: LoginIn):
     return {"user_id": doc.id, "username": data["username"]}
 
 
-@app.post("/signup")
+@app.post("/auth/signup")
 def signup(body: LoginIn):
     results = list(
         db.collection("users")
@@ -92,30 +92,25 @@ def signup(body: LoginIn):
     return {"user_id": uid, "username": body.username}
 
 
-@app.post("/users")
-def create_user(body: UserIn):
-    uid = str(uuid.uuid4())
-    db.collection("users").document(uid).set({
-        "username": body.username,
-        "created_at": SERVER_TIMESTAMP,
-        "hashed_password": body.hashed_password,
-    })
-    return {"user_id": uid}
-
-
 @app.get("/users/{user_id}")
 def get_user(user_id: str):
-    doc = _get_user_doc(user_id)
+    doc = _get_doc(user_id, "users")
     return {"user_id": user_id} | (doc.to_dict() or {})
 
 
+@app.get("/users/{user_id}/likes")
+def get_user_likes(user_id: str):
+    docs = db.collection("likes").where("user_id", "==", user_id).stream()
+    return [d.to_dict()["post_id"] for d in docs]
+
+
 @app.get("/users/search/{query}")
-def search_users(query: str):
+def search_users(query: str, top_k: int = 5):
     results = (
         db.collection("users")
           .where("username", ">=", query)
           .where("username", "<=", query + "\uf8ff")
-          .limit(10)
+          .limit(top_k)
           .stream()
     )
     return [{"user_id": d.id} | (d.to_dict() or {}) for d in results]
@@ -129,24 +124,25 @@ def create_post(body: PostIn):
         "temp_username": body.temp_username,
         "content": body.content[:MAX_POST_LEN],
         "created_at": SERVER_TIMESTAMP,
-        "likes": 0,
     })
     return {"post_id": pid}
 
 
 @app.get("/posts/{post_id}")
 def get_post(post_id: str):
-    doc = cast(
-        DocumentSnapshot, 
-        db.collection("posts").document(post_id).get())
-    if not doc.exists:
-        raise HTTPException(404)
+    doc = _get_doc(post_id, "posts")
     return {"post_id": post_id} | (doc.to_dict() or {})
 
 
 @app.post("/posts/{post_id}/like")
 def like_post(post_id: str, user_id: str):
-    db.collection("posts").document(post_id).update({"likes": Increment(1)})
+    like_id = f"{user_id}_{post_id}"
+    like_ref = db.collection("likes").document(like_id)
+
+    if like_ref.get().exists:
+        raise HTTPException(409, "Already liked")
+
+    like_ref.set({"user_id": user_id, "post_id": post_id, "created_at": SERVER_TIMESTAMP})
     return {"ok": True}
 
 
@@ -160,9 +156,7 @@ def rec_feed(user_id: str, top_k: int = 10):
 
     posts = []
     for pid in post_ids:
-        doc = cast(
-            DocumentSnapshot, 
-            db.collection("posts").document(pid).get())
+        doc = _get_doc(pid, "posts")
         if doc.exists:
             posts.append({"post_id": pid} | (doc.to_dict() or {}))
     return posts
@@ -178,9 +172,7 @@ def rec_users(user_id: str, top_k: int = 5):
 
     users = []
     for uid in user_ids:
-        doc = cast(
-            DocumentSnapshot, 
-            db.collection("users").document(uid).get())
+        doc = _get_doc(uid, "users")
         if doc.exists:
             users.append({"user_id": uid} | (doc.to_dict() or {}))
     return users

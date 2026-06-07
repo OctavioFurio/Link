@@ -175,7 +175,7 @@ async function handleSearch() {
 
     const list = document.getElementById("suggestions-list");
     const panel = document.getElementById("suggestions-panel");
-    panel.querySelector("h3").textContent = `Resultados para "${query}"`;
+    panel.querySelector("sidebar-heading").textContent = `Resultados para "${query}"`;
     setListMessage(list, "Buscando...");
 
     try {

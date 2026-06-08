@@ -40,11 +40,12 @@ function updateProfBtn() {
 async function loadFeed() {
     const container = document.getElementById("posts-container");
     setFeedMessage(container, "Carregando...");
-
-    var img = document.createElement('img');
-    img.setAttribute("src", "Mink-run.gif");
-    img.setAttribute("alt", "Jink, a fuinha, saltando.");
-    container.appendChild(img);
+    
+    container.innerHTML = `
+        <div style='padding:1rem;text-align:center'>
+            <img src="Mink-run.gif" alt="Jink, a fuinha, saltando.">
+        </div>
+    `;
  
     try {
         const [posts, likedIds] = await Promise.all([
@@ -89,7 +90,7 @@ function renderPost(post, username, liked=false) {
         <div class="post-meta">${username}</div>
         <div class="post-content">${escHtml(post.content)}</div>
         <div class="post-actions">
-            <button class="like-btn${liked ? ".liked" : ""}" data-id="${post.post_id}">
+            <button class="like-btn${liked ? " liked" : ""}" data-id="${post.post_id}">
                 ${liked ? "♥" : "♡"}
             </button>
         </div>`;
@@ -102,7 +103,7 @@ function renderPost(post, username, liked=false) {
 
 async function likePost(postId, card) {
     const btn = card.querySelector(".like-btn");
-    btn.classList.add("button-selected");
+    btn.classList.add("liked"); 
     btn.textContent = "♥";
     btn.onclick = null;
 
@@ -111,8 +112,7 @@ async function likePost(postId, card) {
         toast("Curtido!");
     } catch (error) {
         console.error(`Fail to like post ${postId}:`, error);
-        btn.classList.remove("button-selected");
-        btn.classList.add("like-btn.liked")
+        btn.classList.remove("liked");
         btn.textContent = "♡";
         btn.onclick = () => likePost(postId, card);
     }

@@ -40,6 +40,11 @@ function updateProfBtn() {
 async function loadFeed() {
     const container = document.getElementById("posts-container");
     setFeedMessage(container, "Carregando...");
+
+    var img = document.createElement('img');
+    img.setAttribute("src", "Mink-run.gif");
+    img.setAttribute("alt", "Jink, a fuinha, saltando.");
+    container.appendChild(img);
  
     try {
         const [posts, likedIds] = await Promise.all([
@@ -107,6 +112,7 @@ async function likePost(postId, card) {
     } catch (error) {
         console.error(`Fail to like post ${postId}:`, error);
         btn.classList.remove("button-selected");
+        btn.classList.add("like-btn.liked")
         btn.textContent = "♡";
         btn.onclick = () => likePost(postId, card);
     }

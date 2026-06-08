@@ -43,7 +43,7 @@ async function loadFeed() {
     
     container.innerHTML = `
         <div style='padding:1rem;text-align:center'>
-            <img src="Mink-run.gif" alt="Jink, a fuinha, saltando.">
+            <img src="Mink-run.gif" alt="Jink, a fuinha, saltando." style='width:80px'>
         </div>
     `;
  

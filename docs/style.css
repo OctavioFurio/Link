@@ -150,7 +150,7 @@ a#profile-btn {
 }
 a#profile-btn:hover {
     background: transparent;
-    color: var(--main-color);
+    color: var(--accent-color);
 }
 
 .btn-ghost {
@@ -227,7 +227,7 @@ main { min-height: 100vh; }
     flex-shrink: 0;
 }
 .follow-btn:hover {
-    background: var(--main-color);
+    background: var(--accent-color);
     color: var(--foreground-color);
 }
 .follow-btn.following {
@@ -314,7 +314,7 @@ main { min-height: 100vh; }
 .post-author {
     font-weight: 600;
     font-size: var(--font-size-small);
-    color: var(--main-color);
+    color: var(--accent-color);
 }
 
 .post-time {

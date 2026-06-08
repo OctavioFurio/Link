@@ -84,8 +84,8 @@ function renderPost(post, username, liked=false) {
         <div class="post-meta">${username}</div>
         <div class="post-content">${escHtml(post.content)}</div>
         <div class="post-actions">
-            <button class="like-btn${liked ? " button-selected" : ""}" data-id="${post.post_id}">
-                ${liked ? "♥ Curtiu!" : "♥ Curtir"}
+            <button class="like-btn${liked ? ".liked" : ""}" data-id="${post.post_id}">
+                ${liked ? "♥" : "♡"}
             </button>
         </div>`;
     if (!liked) {
@@ -98,7 +98,7 @@ function renderPost(post, username, liked=false) {
 async function likePost(postId, card) {
     const btn = card.querySelector(".like-btn");
     btn.classList.add("button-selected");
-    btn.textContent = "♥ Curtiu!";
+    btn.textContent = "♥";
     btn.onclick = null;
 
     try {
@@ -107,7 +107,7 @@ async function likePost(postId, card) {
     } catch (error) {
         console.error(`Fail to like post ${postId}:`, error);
         btn.classList.remove("button-selected");
-        btn.textContent = "♥ Curtir";
+        btn.textContent = "♡";
         btn.onclick = () => likePost(postId, card);
     }
 }

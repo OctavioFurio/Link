@@ -4,10 +4,11 @@ const MAX_POST_LEN = 256;
 
 const USER_ID = localStorage.getItem("user_id");
 const TEMP_USERNAME = localStorage.getItem("username");
+const IS_LOGGED = USER_ID && USER_ID != "undefined";
 
 const COMPOSE_TEXTAREA = document.getElementById("post-input");
 
-if (USER_ID && USER_ID != "undefined") {
+if (IS_LOGGED) {
     updateProfBtn();
 }
 loadAll();
@@ -83,18 +84,27 @@ function setFeedMessage(container, message) {
 function renderPost(post, username, liked=false) {
     const card = document.createElement("article");
     card.className = "post-card";
-    card.innerHTML = `
-        <div class="post-meta">${username}</div>
-        <div class="post-content">${escHtml(post.content)}</div>
-        <div class="post-actions">
-            <button class="like-btn${liked ? " liked" : ""}" data-id="${post.post_id}">
-                ${liked ? "♥" : "♡"}
-            </button>
-        </div>`;
-    if (!liked) {
-        card.querySelector(".like-btn").addEventListener("click", () => 
-            likePost(post.post_id, card));
-    }
+	if(IS_LOGGED) {
+		card.innerHTML = `
+        	<div class="post-meta">${username}</div>
+        	<div class="post-content">${escHtml(post.content)}</div>
+        		<div class="post-actions">
+            	<button class="like-btn${liked ? " liked" : ""}" data-id="${post.post_id}">
+                	${liked ? "♥" : "♡"}
+            	</button>
+        	</div>
+		`;
+		if (!liked) {
+        	card.querySelector(".like-btn").addEventListener("click", () => 
+            	likePost(post.post_id, card));
+    	}
+	}
+	else {
+		card.innerHTML = `
+			<div class="post-meta">${username}</div>
+			<div class="post-content">${escHtml(post.content)}</div>
+		`;
+	}
     return card;
 }
 

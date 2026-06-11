@@ -72,6 +72,13 @@ header {
     mix-blend-mode: screen;
 }
 
+.logo-img-large {
+	height: 100px;
+	width: auto;
+	flex-shrink: 0;
+	mix-blend-mode: screen;
+}
+
 header nav {
     display: flex;
     align-items: center;
@@ -408,14 +415,6 @@ footer {
     justify-content: center;
     gap: 24px;
     min-height: 100vh;
-}
-
-.logo-large {
-    font-weight: 700;
-    color: var(--main-color);
-    font-size: var(--font-size-giant);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
 }
 
 .login-form {

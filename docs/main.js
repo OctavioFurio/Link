@@ -18,6 +18,7 @@ if (!USER_ID || USER_ID == "undefined") {
 
 document.getElementById("post-btn").addEventListener("click", handleNewPost);
 document.getElementById("search-btn").addEventListener("click", handleSearch);
+document.getElementById("exit-btn").addEvenListener("click", handleExit);
 COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
 
 function loadAll() {
@@ -216,4 +217,10 @@ function handleInputCounter() {
         charCount.style.color = "var(--muted-text-color)";
         charCount.style.fontWeight = "normal";
     }
+}
+
+function handleExit() {
+	localStorage.removeItem("user_id");
+    localStorage.removetItem("username");	
+    window.location.href = `${DOMAIN}/login`;
 }

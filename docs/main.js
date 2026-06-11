@@ -7,18 +7,14 @@ const TEMP_USERNAME = localStorage.getItem("username");
 
 const COMPOSE_TEXTAREA = document.getElementById("post-input");
 
-if (!USER_ID || USER_ID == "undefined") {
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("username");
-    window.location.href = `${DOMAIN}/login`;
-} else {
+if (USER_ID && USER_ID != "undefined") {
     updateProfBtn();
-    loadAll();
 }
+loadAll();
 
 document.getElementById("post-btn").addEventListener("click", handleNewPost);
 document.getElementById("search-btn").addEventListener("click", handleSearch);
-document.getElementById("exit-btn").addEvenListener("click", handleExit);
+document.getElementById("exit-btn").addEventListener("click", handleExit);
 COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
 
 function loadAll() {
@@ -221,6 +217,6 @@ function handleInputCounter() {
 
 function handleExit() {
 	localStorage.removeItem("user_id");
-    localStorage.removetItem("username");	
+    localStorage.removeItem("username");	
     window.location.href = `${DOMAIN}/login`;
 }

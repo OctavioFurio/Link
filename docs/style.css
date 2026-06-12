@@ -383,10 +383,13 @@ main { min-height: 100vh; }
 
 footer {
     padding: 1.5rem 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.footnote {
     text-align: center;
     color: var(--muted-text-color);
     font-size: var(--font-size-small);
-    border-top: 1px solid var(--border-color);
 }
 
 .toast {

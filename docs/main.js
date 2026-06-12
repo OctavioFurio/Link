@@ -10,13 +10,26 @@ const COMPOSE_TEXTAREA = document.getElementById("post-input");
 
 if (IS_LOGGED) {
     updateProfBtn();
+
+	document.getElementById("post-btn").addEventListener("click", handleNewPost);
+	document.getElementById("search-btn").addEventListener("click", handleSearch);
+	document.getElementById("exit-btn").addEventListener("click", handleExit);
+	COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
+}
+else {
+  	document.querySelector('.main-content').style.gridTemplateColumns = '1fr';
+  	document.querySelector('.sidebar').style.display = 'none';
+  	document.querySelector('#search-input').style.display = 'none';
+  	document.querySelector('#search-btn').style.display = 'none';
+	document.querySelector('#exit-btn').style.display = 'none';
+	
+	const compose = document.querySelector('.compose');
+	compose.classList.remove('compose');
+	compose.classList.add('footnote');
+	compose.innerHTML = "Faça login para criar, interagir e conectar!";
+
 }
 loadAll();
-
-document.getElementById("post-btn").addEventListener("click", handleNewPost);
-document.getElementById("search-btn").addEventListener("click", handleSearch);
-document.getElementById("exit-btn").addEventListener("click", handleExit);
-COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
 
 function loadAll() {
     loadFeed();

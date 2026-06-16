@@ -4,21 +4,32 @@ const MAX_POST_LEN = 256;
 
 const USER_ID = localStorage.getItem("user_id");
 const TEMP_USERNAME = localStorage.getItem("username");
+const IS_LOGGED = USER_ID && USER_ID != "undefined";
 
 const COMPOSE_TEXTAREA = document.getElementById("post-input");
 
-if (!USER_ID || USER_ID == "undefined") {
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("username");
-    window.location.href = `${DOMAIN}/login`;
-} else {
+if (IS_LOGGED) {
     updateProfBtn();
-    loadAll();
-}
 
-document.getElementById("post-btn").addEventListener("click", handleNewPost);
-document.getElementById("search-btn").addEventListener("click", handleSearch);
-COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
+	document.getElementById("post-btn").addEventListener("click", handleNewPost);
+	document.getElementById("search-btn").addEventListener("click", handleSearch);
+	document.getElementById("exit-btn").addEventListener("click", handleExit);
+	COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
+}
+else {
+  	document.querySelector('.main-content').style.gridTemplateColumns = '1fr';
+  	document.querySelector('.sidebar').style.display = 'none';
+  	document.querySelector('#search-input').style.display = 'none';
+  	document.querySelector('#search-btn').style.display = 'none';
+	document.querySelector('#exit-btn').style.display = 'none';
+	
+	const compose = document.querySelector('.compose');
+	compose.classList.remove('compose');
+	compose.classList.add('footnote');
+	compose.innerHTML = "Faça login para criar, interagir e conectar!";
+
+}
+loadAll();
 
 function loadAll() {
     loadFeed();
@@ -86,18 +97,27 @@ function setFeedMessage(container, message) {
 function renderPost(post, username, liked=false) {
     const card = document.createElement("article");
     card.className = "post-card";
-    card.innerHTML = `
-        <div class="post-meta">${username}</div>
-        <div class="post-content">${escHtml(post.content)}</div>
-        <div class="post-actions">
-            <button class="like-btn${liked ? " liked" : ""}" data-id="${post.post_id}">
-                ${liked ? "♥" : "♡"}
-            </button>
-        </div>`;
-    if (!liked) {
-        card.querySelector(".like-btn").addEventListener("click", () => 
-            likePost(post.post_id, card));
-    }
+	if(IS_LOGGED) {
+		card.innerHTML = `
+        	<div class="post-meta">${username}</div>
+        	<div class="post-content">${escHtml(post.content)}</div>
+        		<div class="post-actions">
+            	<button class="like-btn${liked ? " liked" : ""}" data-id="${post.post_id}">
+                	${liked ? "♥" : "♡"}
+            	</button>
+        	</div>
+		`;
+		if (!liked) {
+        	card.querySelector(".like-btn").addEventListener("click", () => 
+            	likePost(post.post_id, card));
+    	}
+	}
+	else {
+		card.innerHTML = `
+			<div class="post-meta">${username}</div>
+			<div class="post-content">${escHtml(post.content)}</div>
+		`;
+	}
     return card;
 }
 
@@ -216,4 +236,10 @@ function handleInputCounter() {
         charCount.style.color = "var(--muted-text-color)";
         charCount.style.fontWeight = "normal";
     }
+}
+
+function handleExit() {
+	localStorage.removeItem("user_id");
+    localStorage.removeItem("username");	
+    window.location.href = `${DOMAIN}/login`;
 }

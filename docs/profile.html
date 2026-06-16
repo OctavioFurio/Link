@@ -1,20 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Link - Entrar</title>
+    <title>Link</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-    <main class="login-content">
-        <div class="logo-large">Link</div>
-        <p class="footnote">
-            Não há muito por aqui, ainda...
-        </p>
+    <header>
+        <img src="Jink.png" alt="Link - Perfil" class="logo-img" />
+        <!-- <nav aria-label="Navegação principal">
+             <a id="profile-btn" href="login.html" aria-label="Log in">Login</a> 
+        </nav> -->
+    </header>
+
+    <main class="main-content" id="main">
+        <section class="feed" aria-label="Aba de perfil">
+            <canvas id="pfp-canvas" width="140" height="140"></canvas>
+            <div class="inspector">
+                <div class="color-row">
+                    <label for="color0">Pelo - Principal</label>
+                    <input type="color" id="color0" value="#f2ec98">
+                </div>
+                <div class="color-row">
+                    <label for="color1">Pelo - Secundário</label>
+                    <input type="color" id="color1" value="#f2c29a">
+                </div>
+                <div class="color-row">
+                    <label for="color2">Olhos e plano de fundo</label>
+                    <input type="color" id="color2" value="#579af1">
+                </div>
+                <div class="action-bar">
+                    <button id="save-file">Salvar como arquivo</button>
+                    <button id="save-colors">Salvar Mink</button>
+                </div>
+            </div>
+
+            <button id="profile-btn">Customizar Mink</button>
+        </section>
+        
     </main>
 
     <footer>
@@ -23,9 +48,16 @@
         </p>
     </footer>
 
-    <div id="toast" class="toast hidden"></div>
+    <div
+        id="toast"
+        class="toast hidden"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+    ></div>
 
     <script src="utils.js"></script>
-    <script src="login.js"></script>
+    <script src="profileUtils.js"></script>
+    <!-- <script src="main.js"></script> -->
 </body>
 </html>

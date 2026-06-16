@@ -461,3 +461,9 @@ footer {
     .main-content { grid-template-columns: 1fr; }
     .sidebar, #search-input, #search-btn { display: none; }
 }
+
+#pfp-canvas {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+}

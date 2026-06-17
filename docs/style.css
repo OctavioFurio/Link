@@ -171,6 +171,10 @@ a#profile-btn:hover {
     background: transparent;
 }
 
+.button-icon {
+    border-radius: 50%;
+}
+
 main { min-height: 100vh; }
 
 .main-content {
@@ -459,13 +463,13 @@ footer {
     border-color: rgba(242, 236, 153, 0.25);
 }
 
-@media (max-width: 640px) {
-    .main-content { grid-template-columns: 1fr; }
-    .sidebar, #search-input, #search-btn { display: none; }
-}
-
 #pfp-canvas {
     width: 140px;
     height: 140px;
     border-radius: 50%;
+}
+
+@media (max-width: 640px) {
+    .main-content { grid-template-columns: 1fr; }
+    .sidebar, #search-input, #search-btn { display: none; }
 }

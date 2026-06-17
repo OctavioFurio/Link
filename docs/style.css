@@ -171,8 +171,26 @@ a#profile-btn:hover {
     background: transparent;
 }
 
-.button-icon {
-    border-radius: 50%;
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    transition: background 0.2s, color 0.2s;
+}
+.svg-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: auto;
+    stroke: var(--foreground-color);
+    transition: stroke 0.2s, color 0.2s;
+}
+
+.btn-icon:hover .svg-icon {
+    stroke: var(--main-color);
 }
 
 main { min-height: 100vh; }

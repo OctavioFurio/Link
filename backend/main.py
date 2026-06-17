@@ -143,6 +143,7 @@ def like_post(post_id: str, user_id: str):
         raise HTTPException(409, "Already liked")
 
     like_ref.set({"user_id": user_id, "post_id": post_id, "created_at": SERVER_TIMESTAMP})
+    db.collection("posts").document(post_id).update({"likes_count": Increment(1)})
     return {"ok": True}
 
 

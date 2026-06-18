@@ -109,7 +109,7 @@ function renderPost(post, username, liked=false) {
 		`;
 		if (!liked) {
         	card.querySelector(".like-btn").addEventListener("click", () => 
-            	likePost(post.post_id, card));
+            	likePost(post.post_id, card, post.likes_count));
     	}
 	}
 	else {
@@ -121,10 +121,10 @@ function renderPost(post, username, liked=false) {
     return card;
 }
 
-async function likePost(postId, card) {
+async function likePost(postId, card, likes) {
     const btn = card.querySelector(".like-btn");
     btn.classList.add("liked"); 
-    btn.textContent = "♥";
+    btn.textContent = `♥ ${likes + 1}`;
     btn.onclick = null;
 
     try {
@@ -133,7 +133,7 @@ async function likePost(postId, card) {
     } catch (error) {
         console.error(`Fail to like post ${postId}:`, error);
         btn.classList.remove("liked");
-        btn.textContent = "♡";
+        btn.textContent = `♡ ${likes}`;
         btn.onclick = () => likePost(postId, card);
     }
 }

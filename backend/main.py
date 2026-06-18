@@ -14,7 +14,7 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from rec_client import get_feed, get_user_suggestions
 
 MAX_POST_LEN = 256
-
+DEFAULT_MINK_COLORS = [242, 236, 152, 242, 194, 154, 87, 154, 241]
 app = FastAPI()
 
 # TODO: LIMITAR!!!
@@ -87,6 +87,7 @@ def signup(body: LoginIn):
     db.collection("users").document(uid).set({
         "username": body.username,
         "hashed_password": _hash(body.password),
+		"mink_colors": DEFAULT_MINK_COLORS,
         "created_at": SERVER_TIMESTAMP,
     })
     return {"user_id": uid, "username": body.username}
@@ -96,6 +97,25 @@ def signup(body: LoginIn):
 def get_user(user_id: str):
     doc = _get_doc(user_id, "users")
     return {"user_id": user_id} | (doc.to_dict() or {})
+
+
+@app.put("/users/{user_id}/colors")
+def set_user_mink_colors(user_id: str, colors: list[int]):    
+	user_ref = db.collection("users").document(user_id) 
+
+	if not user_ref.get().exists:
+        raise HTTPException(404, "User not found")
+
+	user_ref.update({
+		"mink_colors": colors
+	})
+    return {"ok": True}
+
+
+@app.get("/users/{user_id}/colors")
+def get_user_mink_colors(user_id: str):
+    doc = _get_doc(user_id, "users")
+    return {"mink_colors": (doc.to_dict() or {}).get("mink_colors")}
 
 
 @app.get("/users/{user_id}/likes")

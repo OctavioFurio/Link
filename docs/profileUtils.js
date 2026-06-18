@@ -11,7 +11,6 @@ function hex2rgb(hex) {
     ];
 }
 
-
 function updatePalette(i, hex) {
     const [r, g, b] = hex2rgb(hex);
     palette[3*i]     = r;
@@ -19,36 +18,36 @@ function updatePalette(i, hex) {
     palette[3*i + 2] = b;
 }
 
-
 function P2rgb(i) {
     return `rgb(${palette[i*3]},${palette[i*3+1]},${palette[i*3+2]})`;
 }
 
-
 function loadImage(src) {
-    return new Promise((res, rej) => {
+    return new Promise((res) => {
         const img = new Image();
         img.onload = () => res(img);
         img.src = src;
     });
 }
 
-
-const C = document.getElementById('pfp-canvas');
+const C   = document.getElementById('pfp-canvas');
 const ctx = C.getContext('2d');
 
 (async () => {
     const [layer0, layer1, layer2, outline] = await Promise.all([
-            loadImage('pfp/secondFur.png'),
-            loadImage('pfp/mainFur.png'),
-            loadImage('pfp/bg&eyes.png'),
-            loadImage('pfp/outline.png'),
+        loadImage('pfp/secondFur.png'),
+        loadImage('pfp/mainFur.png'),
+        loadImage('pfp/bg&eyes.png'),
+        loadImage('pfp/outline.png'),
     ]);
+
+    const previewC   = document.getElementById('pfp-preview');
+    const previewCtx = previewC.getContext('2d');
 
     function inPaint(img, color) {
         const { width: w, height: h } = C;
         const off = new OffscreenCanvas(w, h);
-        const oc = off.getContext('2d');
+        const oc  = off.getContext('2d');
         oc.drawImage(img, 0, 0, w, h);
         oc.globalCompositeOperation = 'source-atop';
         oc.fillStyle = color;
@@ -61,13 +60,22 @@ const ctx = C.getContext('2d');
         ctx.clearRect(0, 0, w, h);
         ctx.save();
         ctx.beginPath();
-        ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
+        ctx.arc(w/2, h/2, Math.min(w,h)/2, 0, Math.PI*2);
         ctx.clip();
         inPaint(layer0, P2rgb(0));
         inPaint(layer1, P2rgb(1));
         inPaint(layer2, P2rgb(2));
         ctx.drawImage(outline, 0, 0, w, h);
         ctx.restore();
+
+        const pw = previewC.width, ph = previewC.height;
+        previewCtx.clearRect(0, 0, pw, ph);
+        previewCtx.save();
+        previewCtx.beginPath();
+        previewCtx.arc(pw/2, ph/2, Math.min(pw,ph)/2, 0, Math.PI*2);
+        previewCtx.clip();
+        previewCtx.drawImage(C, 0, 0, pw, ph);
+        previewCtx.restore();
     }
 
     [0, 1, 2].forEach(i => {
@@ -94,30 +102,45 @@ const ctx = C.getContext('2d');
     render();
 })();
 
+const inspector = document.getElementById('inspector-modal');
+const backdrop  = document.getElementById('inspector-backdrop');
+const closeBtn  = document.getElementById('inspector-close');
+
+function openInspector() {
+    inspector.classList.remove('is-hidden');
+    backdrop.classList.remove('is-hidden');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+}
+
+function closeInspector() {
+    inspector.classList.add('is-hidden');
+    backdrop.classList.add('is-hidden');
+    document.body.style.overflow = '';
+}
+
+C.addEventListener('click', openInspector);
+document.getElementById('profile-btn').addEventListener('click', openInspector);
+
+closeBtn.addEventListener('click', closeInspector);
+backdrop.addEventListener('click', closeInspector);
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !inspector.classList.contains('is-hidden')) closeInspector();
+});
 
 
 // Bio
-const minkPopupBtn  = document.getElementById('profile-btn');
-const inspector     = document.querySelector('.inspector');
-const profileName   = document.getElementById('profile-name');
-const bioView       = document.querySelector('.bio-view');
-const bioText       = document.getElementById('bio-text');
-const bioSection    = document.querySelector('.bio-section');
-const editBioBtn    = document.getElementById('edit-bio-btn');
-
-const bioInput      = document.getElementById('bio-input');
-const bioCount      = document.getElementById('bio-count');
-const saveBioBtn    = document.getElementById('save-bio');
-const USER_ID       = localStorage.getItem('user_id');
+const profileName = document.getElementById('profile-name');
+const bioView     = document.querySelector('.bio-view');
+const bioText     = document.getElementById('bio-text');
+const bioSection  = document.querySelector('.bio-section');
+const editBioBtn  = document.getElementById('edit-bio-btn');
+const bioInput    = document.getElementById('bio-input');
+const bioCount    = document.getElementById('bio-count');
+const saveBioBtn  = document.getElementById('save-bio');
+const USER_ID     = localStorage.getItem('user_id');
 
 profileName.textContent = localStorage.getItem('username') || 'Usuário';
-
-function toggleInspector() {
-    inspector.classList.toggle('is-hidden');
-}
-
-C.addEventListener('click', toggleInspector);
-minkPopupBtn.addEventListener('click', toggleInspector);
 
 editBioBtn.addEventListener('click', () => {
     bioView.classList.add('is-hidden');

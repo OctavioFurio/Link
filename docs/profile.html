@@ -20,24 +20,6 @@
                 <div class="profile-top">
                     <div class="mink-popup-wrapper">
                         <canvas id="pfp-canvas" width="140" height="140"></canvas>
-                        <div class="inspector is-hidden">
-                            <div class="color-row">
-                                <label for="color0">Pelo - Principal</label>
-                                <input type="color" id="color0" value="#f2ec98">
-                            </div>
-                            <div class="color-row">
-                                <label for="color1">Pelo - Secundário</label>
-                                <input type="color" id="color1" value="#f2c29a">
-                            </div>
-                            <div class="color-row">
-                                <label for="color2">Olhos e plano de fundo</label>
-                                <input type="color" id="color2" value="#579af1">
-                            </div>
-                            <div class="action-bar">
-                                <button id="save-file">Salvar como arquivo</button>
-                                <button id="save-colors">Salvar Mink</button>
-                            </div>
-                        </div>
                     </div>
                     <button id="profile-btn" class="btn-ghost">Customizar Mink</button>
                 </div>
@@ -65,14 +47,33 @@
             Feito por Murilo e Octávio exclusivamente para fins acadêmicos.
         </p>
     </footer>
-    <div
-        id="toast"
-        class="toast hidden"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-    ></div>
-    
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="inspector-backdrop" class="is-hidden" aria-hidden="true"></div>
+    <div id="inspector-modal" class="is-hidden" role="dialog" aria-modal="true" aria-label="Customizar Mink">
+        <button id="inspector-close" aria-label="Fechar">✕</button>
+        <canvas id="pfp-preview" width="200" height="200" aria-hidden="true"></canvas>
+        <div class="inspector-controls">
+            <div class="color-row">
+                <label for="color0">Pelo - Principal</label>
+                <input type="color" id="color0" value="#f2ec98">
+            </div>
+            <div class="color-row">
+                <label for="color1">Pelo - Secundário</label>
+                <input type="color" id="color1" value="#f2c29a">
+            </div>
+            <div class="color-row">
+                <label for="color2">Olhos e plano de fundo</label>
+                <input type="color" id="color2" value="#579af1">
+            </div>
+        </div>
+        <div class="action-bar">
+            <button id="save-file">Salvar como arquivo</button>
+            <button id="save-colors">Salvar Mink</button>
+        </div>
+    </div>
+
     <script src="utils.js"></script>
     <script src="profileUtils.js"></script>
 </body>

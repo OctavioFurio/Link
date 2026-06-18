@@ -154,12 +154,51 @@ function updatePostUsername(postElement, username) {
     postElement.querySelector(".post-name").textContent = username;
 }
 
+// async function loadFeed() {
+//     const container = document.getElementById("posts-container");
+//     setFeedMessage(container, "Carregando...");
+    
+//     container.innerHTML = `
+//         <div style='padding:1rem;text-align:center'>
+//             <img src="Mink-run.gif" alt="Jink, a fuinha, saltando." style='width:200px'>
+//         </div>
+//     `;
+ 
+//     try {
+//         const posts = await apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`);
+//         const likedIds = IS_LOGGED ? await apiFetch(`/users/${USER_ID}/likes`) : [];
+//         const likedSet = new Set(likedIds);
+
+//         container.innerHTML = "";
+//         if (!posts.length) {
+//             setFeedMessage(container, "Sem postagens ainda.");
+//             return;
+//         }
+
+//         const postElements = posts.map(post => {
+//             const render = renderPost(post, post.temp_username, likedSet.has(post.post_id));
+//             container.appendChild(render);
+//             return render;
+//         });
+
+//         posts.forEach(async (post, i) => {
+//             const userData = await apiFetch(`/users/${post.user_id}`);
+//             updatePostUsername(postElements[i], userData.username);
+//         });
+//     } catch (error) {
+//         console.error("Fail to load feed:", error);
+//         setFeedMessage(container, "Falha ao carregar postagens.");
+//     }
+// }
+
 async function loadSuggestions() {
     const list = document.getElementById("suggestions-list");
     setListMessage(list, "Carregando...");
 
     try {
         const users = await apiFetch(`/rec/users/${USER_ID}?top_k=${TOP_K_SEARCH}`);
+        const followingIds = await apiFetch(`/users/${USER_ID}/followings`);
+        const followingSet = new Set(followingIds);
 
         list.innerHTML = "";
         if (!users.length) {
@@ -167,7 +206,7 @@ async function loadSuggestions() {
             return;
         }
 
-        users.forEach(user => list.appendChild(renderUserLi(user)));
+        users.forEach(user => list.appendChild(renderUserLi(user, followingSet.has(user.user_id))));
     } catch (error) {
         console.error("Fail to load suggestions:", error);
         setListMessage(list, "Falha ao carregar sugestões.");
@@ -250,6 +289,8 @@ async function handleSearch() {
 
     try {
         const users = await apiFetch(`/users/search/${encodeURIComponent(query)}?top_k=${TOP_K_SEARCH}`);
+        const followingIds = await apiFetch(`/users/${USER_ID}/followings`);
+        const followingSet = new Set(followingIds);
 
         list.innerHTML = "";
         if (!users.length) {
@@ -258,7 +299,7 @@ async function handleSearch() {
             return;
         }
 
-        users.forEach(user => list.appendChild(renderUserLi(user)));
+        users.forEach(user => list.appendChild(renderUserLi(user, followingSet.has(user.user_id))));
         toast("Usuários encontrados!");
     } catch (error) {
         console.error("Fail to search users:", error);

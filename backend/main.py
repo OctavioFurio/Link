@@ -160,6 +160,12 @@ def get_user_likes(user_id: str):
     return [d.to_dict()["post_id"] for d in docs]
 
 
+@app.get("/users/{user_id}/followings")
+def get_user_followings(user_id: str):
+    docs = db.collection("follows").where("follower_id", "==", user_id).stream()
+    return [d.to_dict()["followed_id"] for d in docs]    
+
+
 @app.post("/users/{user_id}/follow")
 def follow_user(user_id: str, body: FollowIn):
     follow_ref = db.collection("follows").document(f"{user_id}_{body.user_id}")

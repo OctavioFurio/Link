@@ -178,12 +178,44 @@ function setListMessage(list, message) {
     list.innerHTML = `<li style='color:var(--muted-text-color)'>${message}</li>`;
 }
 
-function renderUserLi(user) {
+function renderUserLi(user, following=false) {
     const li = document.createElement("li");
     li.innerHTML = `
-        <span>${user.username ?? user.user_id}</span>
-        <button class="follow-btn">Seguir</button>`;
+        <span>${user.username ?? "???"}</span>
+        <button class="follow-btn${following ? " following" : ""}" 
+                data-id="${user.user_id}">
+            ${following ? "Seguindo" : "Seguir"}
+        </button>`;
+    li.querySelector(".follow-btn").addEventListener("click", (e) => 
+        toggleFollow(e.currentTarget));
     return li;
+}
+
+async function toggleFollow(btn) {
+    const userId = btn.dataset.id;
+    const isFollowing = btn.classList.contains("following");
+    const newFollowing = !isFollowing;
+
+    btn.classList.toggle("following", newFollowing);
+    btn.textContent = `${newFollowing ? "Seguindo" : "Seguir"}`;
+    btn.disabled = true;
+
+    try {
+        await apiFetch(`/users/${USER_ID}/follow`, {
+            method: newFollowing ? "POST" : "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userId }),
+        });
+        toast(newFollowing ? "Seguiu!" : "Deixou de seguir!");
+    } catch (error) {
+        console.error(`Fail to toggle follow on user ${userId}:`, error);
+        toast(newFollowing ? "Falha ao seguir, tente novamente." : "Falha ao deixar de seguir, tente novamente.");
+
+        btn.classList.toggle("following", isFollowing);
+        btn.textContent = `${isFollowing ? "Seguindo" : "Seguir"}`;
+    } finally {
+        btn.disabled = false;
+    }
 }
 
 async function handleNewPost() {

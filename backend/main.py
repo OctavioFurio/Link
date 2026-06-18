@@ -43,10 +43,14 @@ class LoginIn(BaseModel):
 
 class LikeIn(BaseModel):
     user_id: str
- 
- 
+
+
 class ColorsIn(BaseModel):
     colors: list[int]
+
+
+class FollowIn(BaseModel):
+    user_id: str
 
 
 def _make_salt() -> str:
@@ -154,6 +158,28 @@ def get_user_mink_colors(user_id: str):
 def get_user_likes(user_id: str):
     docs = db.collection("likes").where("user_id", "==", user_id).stream()
     return [d.to_dict()["post_id"] for d in docs]
+
+
+@app.post("/users/{user_id}/follow")
+def follow_user(user_id: str, body: FollowIn):
+    follow_ref = db.collection("follows").document(f"{user_id}_{body.user_id}")
+
+    if follow_ref.get().exists:
+        raise HTTPException(409, "Already following")
+
+    follow_ref.set({"follower_id": user_id, "followed_id": body.user_id, "created_at": SERVER_TIMESTAMP})
+    return OK
+
+
+@app.delete("/users/{user_id}/follow")
+def unfollow_user(user_id: str, body: FollowIn):
+    follow_ref = db.collection("follows").document(f"{user_id}_{body.user_id}")
+
+    if not follow_ref.get().exists:
+        raise HTTPException(404, "Not following yet")
+
+    follow_ref.delete()
+    return OK
 
 
 @app.get("/users/search/{query}")

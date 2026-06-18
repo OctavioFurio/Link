@@ -86,15 +86,19 @@
 
         <div id="chat-widget" style="display:none">
             <div id="chat-box" class="hidden">
-                <div id="chat-header">
-                    <select id="chat-user-select">
-                        <option value="">Selecionar usuário…</option>
-                    </select>
+                <div id="chat-sidebar">
+                    <div id="chat-sidebar-heading">Conversas</div>
+                    <ul id="chat-user-list"></ul>
                 </div>
-                <div id="chat-messages"></div>
-                <div id="chat-input-row">
-                    <input id="chat-input" type="text" placeholder="Mensagem…" maxlength="256" />
-                    <button id="chat-send-btn">Enviar</button>
+                <div id="chat-main">
+                    <div id="chat-header">
+                        <span id="chat-receiver-name">Selecione alguém</span>
+                    </div>
+                    <div id="chat-messages"></div>
+                    <div id="chat-input-row">
+                        <input id="chat-input" type="text" placeholder="Mensagem…" maxlength="512" />
+                        <button id="chat-send-btn">Enviar</button>
+                    </div>
                 </div>
             </div>
             <button id="chat-toggle-btn" class="btn-icon" title="Chat">

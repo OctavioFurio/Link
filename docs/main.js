@@ -307,65 +307,73 @@ function handleExit() {
 }
 
 if (IS_LOGGED) {
-    const widget      = document.getElementById("chat-widget");
-    const chatBox     = document.getElementById("chat-box");
-    const toggleBtn   = document.getElementById("chat-toggle-btn");
-    const messagesDiv = document.getElementById("chat-messages");
-    const chatInput   = document.getElementById("chat-input");
-    const sendBtn     = document.getElementById("chat-send-btn");
-    const userSelect  = document.getElementById("chat-user-select");
+    const widget       = document.getElementById("chat-widget");
+    const chatBox      = document.getElementById("chat-box");
+    const toggleBtn    = document.getElementById("chat-toggle-btn");
+    const messagesDiv  = document.getElementById("chat-messages");
+    const chatInput    = document.getElementById("chat-input");
+    const sendBtn      = document.getElementById("chat-send-btn");
+    const userList     = document.getElementById("chat-user-list");
+    const receiverName = document.getElementById("chat-receiver-name");
 
     let chatPollInterval = null;
     let currentReceiver  = null;
+    let currentReceiverName = null;
 
     widget.style.display = "flex";
 
-    // Abre/fecha o chat
     toggleBtn.addEventListener("click", () => {
         chatBox.classList.toggle("hidden");
         if (!chatBox.classList.contains("hidden")) loadChatUsers();
     });
 
-    // Troca de conversa
-    userSelect.addEventListener("change", () => {
-        currentReceiver = userSelect.value || null;
-        clearInterval(chatPollInterval);
-        messagesDiv.innerHTML = "";
-        if (currentReceiver) {
-            loadMessages();
-            chatPollInterval = setInterval(loadMessages, 3000); // polling a cada 3s
-        }
-    });
-
-    // Enviar mensagem
     sendBtn.addEventListener("click", sendChatMessage);
     chatInput.addEventListener("keydown", e => {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
     });
 
     async function loadChatUsers() {
-        // Preenche o select com as sugestões já carregadas
+        userList.innerHTML = `<li style="color:var(--muted-text-color)">Carregando…</li>`;
         try {
-            const users = await apiFetch(`/rec/users/${USER_ID}?top_k=20`);
-            userSelect.innerHTML = `<option value="">Selecionar usuário…</option>`;
-            users.forEach(u => {
-                if (u.user_id === USER_ID) return;
-                const opt = document.createElement("option");
-                opt.value = u.user_id;
-                opt.textContent = u.username ?? u.user_id;
-                userSelect.appendChild(opt);
-            });
+            const followingIds = await apiFetch(`/users/${USER_ID}/followings`);
+            userList.innerHTML = "";
+
+            if (!followingIds.length) {
+                userList.innerHTML = `<li style="color:var(--muted-text-color)">Ninguém ainda.</li>`;
+                return;
+            }
+
+            await Promise.all(followingIds.map(async uid => {
+                const userData = await apiFetch(`/users/${uid}`);
+                const li = document.createElement("li");
+                li.textContent = userData.username ?? uid;
+                li.dataset.id  = uid;
+                li.addEventListener("click", () => selectReceiver(uid, userData.username, li));
+                userList.appendChild(li);
+            }));
         } catch (e) {
-            console.error("Falha ao carregar usuários para chat:", e);
+            console.error("Falha ao carregar usuários:", e);
         }
+    }
+
+    function selectReceiver(uid, username, li) {
+        currentReceiver     = uid;
+        currentReceiverName = username;
+        receiverName.textContent = username;
+
+        userList.querySelectorAll("li").forEach(el => el.classList.remove("active"));
+        li.classList.add("active");
+
+        messagesDiv.innerHTML = "";
+        clearInterval(chatPollInterval);
+        loadMessages();
+        chatPollInterval = setInterval(loadMessages, 3000);
     }
 
     async function loadMessages() {
         if (!currentReceiver) return;
         try {
-            const msgs = await apiFetch(
-                `/chat/messages?user_a=${USER_ID}&user_b=${currentReceiver}`
-            );
+            const msgs = await apiFetch(`/chat/messages?user_a=${USER_ID}&user_b=${currentReceiver}`);
             renderMessages(msgs);
         } catch (e) {
             console.error("Falha ao carregar mensagens:", e);
@@ -373,23 +381,19 @@ if (IS_LOGGED) {
     }
 
     function renderMessages(msgs) {
-        const atBottom =
-            messagesDiv.scrollHeight - messagesDiv.scrollTop <= messagesDiv.clientHeight + 40;
-
+        const atBottom = messagesDiv.scrollHeight - messagesDiv.scrollTop <= messagesDiv.clientHeight + 40;
         messagesDiv.innerHTML = "";
+
         if (!msgs.length) {
-            messagesDiv.innerHTML = `<p style="color:var(--muted-text-color);font-size:var(--font-size-small);text-align:center">Nenhuma mensagem ainda.</p>`;
+            messagesDiv.innerHTML = `<p style="color:var(--muted-text-color);font-size:var(--font-size-small);text-align:center;padding:.5rem">Nenhuma mensagem ainda.</p>`;
             return;
         }
 
         msgs.forEach(msg => {
             const mine = msg.sender_id === USER_ID;
-            const div = document.createElement("div");
+            const div  = document.createElement("div");
             div.className = `chat-msg ${mine ? "mine" : "theirs"}`;
-            div.innerHTML = `
-                ${!mine ? `<div class="msg-sender">${escHtml(msg.sender_id.slice(0,8))}…</div>` : ""}
-                ${escHtml(msg.content)}
-            `;
+            div.textContent = msg.content;
             messagesDiv.appendChild(div);
         });
 
@@ -404,11 +408,7 @@ if (IS_LOGGED) {
             await apiFetch("/chat/message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    sender_id: USER_ID,
-                    receiver_id: currentReceiver,
-                    content,
-                }),
+                body: JSON.stringify({ sender_id: USER_ID, receiver_id: currentReceiver, content }),
             });
             await loadMessages();
         } catch (e) {

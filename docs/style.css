@@ -627,3 +627,37 @@ footer {
     font-size: var(--font-size-small);
     font-variant-numeric: tabular-nums;
 }
+
+.is-hidden { display: none; }
+
+.mink-popup-wrapper {
+    position: relative;
+    width: fit-content;
+}
+
+#pfp-canvas { cursor: pointer; }
+
+.mink-popup-wrapper .inspector {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    margin-top: 0.5rem;
+    padding: 1rem;
+    width: 220px;
+    background: var(--foreground-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+#profile-name {
+    font-size: var(--font-size-large);
+    font-weight: 600;
+}
+
+.bio-view {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}

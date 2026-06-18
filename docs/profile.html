@@ -19,36 +19,42 @@
 
     <main class="main-content" id="main">
         <section class="feed" aria-label="Aba de perfil">
-            <canvas id="pfp-canvas" width="140" height="140"></canvas>
-            <div class="inspector">
-                <div class="color-row">
-                    <label for="color0">Cor Principal</label>
-                    <input type="color" id="color0" value="#f2ec98">
-                </div>
-                <div class="color-row">
-                    <label for="color1">Cor Secundária</label>
-                    <input type="color" id="color1" value="#f2c29a">
-                </div>
-                <div class="color-row">
-                    <label for="color2">Olhos e plano de fundo</label>
-                    <input type="color" id="color2" value="#579af1">
-                </div>
-                <div class="action-bar">
-                    <button id="save-file">Salvar como arquivo</button>
-                    <button id="save-colors">Salvar Mink</button>
+            <div class="mink-popup-wrapper">
+                <canvas id="pfp-canvas" width="140" height="140"></canvas>
+                <div class="inspector is-hidden">
+                    <div class="color-row">
+                        <label for="color0">Pelo - Principal</label>
+                        <input type="color" id="color0" value="#f2ec98">
+                    </div>
+                    <div class="color-row">
+                        <label for="color1">Pelo - Secundário</label>
+                        <input type="color" id="color1" value="#f2c29a">
+                    </div>
+                    <div class="color-row">
+                        <label for="color2">Olhos e plano de fundo</label>
+                        <input type="color" id="color2" value="#579af1">
+                    </div>
+                    <div class="action-bar">
+                        <button id="save-file">Salvar como arquivo</button>
+                        <button id="save-colors">Salvar Mink</button>
+                    </div>
                 </div>
             </div>
-            <div class="bio-section">
+            <h2 id="profile-name"></h2>
+            <div class="bio-view">
+                <p id="bio-text"></p>
+                <button id="edit-bio-btn">Editar bio</button>
+            </div>
+            <div class="bio-section is-hidden">
                 <label for="bio-input" class="sr-only">Bio</label>
-                <textarea id="bio-input" maxlength="160" placeholder="Conte um pouco sobre você..."></textarea>
+                <textarea id="bio-input" maxlength="256" placeholder="Conte um pouco sobre você..."></textarea>
                 <div class="bio-footer">
                     <span id="bio-count">0/256</span>
                     <button id="save-bio">Salvar bio</button>
                 </div>
             </div>
-            <button id="profile-btn">Customizar Mink</button>
+            <button id="profile-btn" class="is-hidden">Customizar Mink</button>
         </section>
-        
     </main>
 
     <footer>

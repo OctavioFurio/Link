@@ -97,32 +97,58 @@ const ctx = C.getContext('2d');
 
 
 // Bio
-const bioInput = document.getElementById('bio-input');
-const bioCount = document.getElementById('bio-count');
-const saveBioBtn = document.getElementById('save-bio');
+const minkPopupBtn  = document.getElementById('profile-btn');
+const inspector     = document.querySelector('.inspector');
+const profileName   = document.getElementById('profile-name');
+const bioView       = document.querySelector('.bio-view');
+const bioText       = document.getElementById('bio-text');
+const bioSection    = document.querySelector('.bio-section');
+const editBioBtn    = document.getElementById('edit-bio-btn');
 
-const USER_ID = localStorage.getItem('user_id');
+const bioInput      = document.getElementById('bio-input');
+const bioCount      = document.getElementById('bio-count');
+const saveBioBtn    = document.getElementById('save-bio');
+const USER_ID       = localStorage.getItem('user_id');
 
-function matchBioLen() {
+profileName.textContent = localStorage.getItem('username') || 'Usuário';
+
+function toggleInspector() {
+    inspector.classList.toggle('is-hidden');
+}
+
+C.addEventListener('click', toggleInspector);
+minkPopupBtn.addEventListener('click', toggleInspector);
+
+editBioBtn.addEventListener('click', () => {
+    bioView.classList.add('is-hidden');
+    bioSection.classList.remove('is-hidden');
+});
+
+function updateBioCount() {
     bioCount.textContent = `${bioInput.value.length}/${BIO_MAX_LEN}`;
 }
 
 if (USER_ID) {
     apiFetch(`/users/${USER_ID}/bio`).then(data => {
         bioInput.value = data.bio || '';
-        matchBioLen();
+        bioText.textContent = data.bio || 'Sem bio ainda.';
+        updateBioCount();
     });
 }
 
-bioInput.addEventListener('input', matchBioLen);
+bioInput.addEventListener('input', updateBioCount);
 
 saveBioBtn.addEventListener('click', () => {
-    if (!USER_ID) 
-        return toast('Faça login para salvar sua bio.');
+    if (!USER_ID) return toast('Faça login para salvar sua bio.');
 
     apiFetch(`/users/${USER_ID}/bio`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bio: bioInput.value }),
-    }).then(() => toast('Bio salva!'));
+    }).then(() => {
+        toast('Bio salva!');
+        bioText.textContent = bioInput.value || 'Sem bio ainda.';
+        bioSection.classList.add('is-hidden');
+        bioView.classList.remove('is-hidden');
+    });
 });

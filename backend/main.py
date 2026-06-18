@@ -87,7 +87,7 @@ def signup(body: LoginIn):
     db.collection("users").document(uid).set({
         "username": body.username,
         "hashed_password": _hash(body.password),
-		"mink_colors": DEFAULT_MINK_COLORS,
+        "mink_colors": DEFAULT_MINK_COLORS,
         "created_at": SERVER_TIMESTAMP,
     })
     return {"user_id": uid, "username": body.username}
@@ -100,15 +100,15 @@ def get_user(user_id: str):
 
 
 @app.put("/users/{user_id}/colors")
-def set_user_mink_colors(user_id: str, colors: list[int]):    
-	user_ref = db.collection("users").document(user_id) 
+def set_user_mink_colors(user_id: str, colors: list[int]):
+    user_ref = db.collection("users").document(user_id)
 
-	if not user_ref.get().exists:
+    if not user_ref.get().exists:
         raise HTTPException(404, "User not found")
 
-	user_ref.update({
-		"mink_colors": colors
-	})
+    user_ref.update({
+        "mink_colors": colors
+    })
     return {"ok": True}
 
 

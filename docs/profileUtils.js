@@ -107,8 +107,12 @@ const backdrop  = document.getElementById('inspector-backdrop');
 const closeBtn  = document.getElementById('inspector-close');
 
 function openInspector() {
+    inspector.style.removeProperty('display');
+    backdrop.style.removeProperty('display');
+
     inspector.classList.remove('is-hidden');
     backdrop.classList.remove('is-hidden');
+
     document.body.style.overflow = 'hidden';
     closeBtn.focus();
 }

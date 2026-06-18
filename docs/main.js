@@ -97,7 +97,7 @@ function renderPost(post, username, liked=false) {
     card.className = "post-card";
 	if(IS_LOGGED) {
         card.innerHTML = `
-            <div class="post-meta"><a class="post-name">${username}</a></div>
+            <div class="post-meta"><span class="post-name">${username}</span> | ${timeAgo(post.created_at)}</div>
             <div class="post-content">${escHtml(post.content)}</div>
             <div class="post-actions">
                 <button class="like-btn${liked ? " liked" : ""}" 
@@ -112,11 +112,25 @@ function renderPost(post, username, liked=false) {
 	}
 	else {
 		card.innerHTML = `
-			<div class="post-meta"><a class="post-name">${username}</a></div>
+			<div class="post-meta"><span class="post-name">${username}</span> | ${timeAgo(post.created_at)}</div>
 			<div class="post-content">${escHtml(post.content)}</div>
 		`;
 	}
     return card;
+}
+
+function timeAgo(isoString) {
+    const diff = Date.now() - new Date(isoString).getTime();
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours   = Math.floor(minutes / 60);
+    const days    = Math.floor(hours / 24);
+
+    if (seconds < 60)  return "agora mesmo";
+    if (minutes < 60)  return `${minutes}min atrás`;
+    if (hours < 24)    return `${hours}h atrás`;
+    if (days < 7)      return `${days}d atrás`;
+    return new Date(isoString).toLocaleDateString("pt-BR");
 }
 
 async function toggleLike(btn) {

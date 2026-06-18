@@ -4,3 +4,6 @@ rec-engine/.env
 .vscode
 venv/
 secrets/
+__pycache__/
+*.py[cod]
+*$py.class

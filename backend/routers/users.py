@@ -71,7 +71,7 @@ def unfollow(user_id: str, body: FollowIn):
     return OK
 
 
-@router.get("/{user_id}/bio")
+@router.put("/{user_id}/bio")
 def set_user_bio(user_id: str, body: BioIn):
     _get_doc(user_id, "users")
     db.collection("users").document(user_id).update({

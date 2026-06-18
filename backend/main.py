@@ -53,6 +53,12 @@ class FollowIn(BaseModel):
     user_id: str
 
 
+class MessageIn(BaseModel):
+    sender_id: str
+    receiver_id: str
+    content: str
+
+
 def _make_salt() -> str:
     return secrets.token_hex(16)
  
@@ -81,6 +87,10 @@ def _serialize_user(id: str, doc: DocumentSnapshot) -> dict:
     data = doc.to_dict() or {}
     public_data = {k: v for k, v in data.items() if k not in SENSITIVE_USER_FIELDS}
     return {"user_id": id} | public_data
+
+
+def _chat_id(user_a: str, user_b: str) -> str:
+    return "__".join(sorted([user_a, user_b]))
 
 
 @app.post("/auth/signin")
@@ -279,3 +289,48 @@ def rec_users(user_id: str, top_k: int = Query(default=5, ge=1, le=50)):
         if doc.exists:
             users.append({"user_id": uid} | (doc.to_dict() or {}))
     return users
+
+
+@app.post("/chat/message")
+def send_message(body: MessageIn):
+    content = body.content.strip()
+    if not content or len(content) > MAX_POST_LEN:
+        raise HTTPException(400, "Mensagem inválida")
+
+    chat_id = _chat_id(body.sender_id, body.receiver_id)
+    mid = str(uuid.uuid4())
+    db.collection("chats").document(chat_id) \
+      .collection("messages").document(mid).set({
+        "sender_id": body.sender_id,
+        "content": content,
+        "created_at": SERVER_TIMESTAMP,
+    })
+    return {"message_id": mid}
+
+
+@app.get("/chat/messages")
+def get_messages(user_a: str, user_b: str, limit: int = Query(default=30, le=100)):
+    chat_id = _chat_id(user_a, user_b)
+    docs = (
+        db.collection("chats").document(chat_id)
+          .collection("messages")
+          .order_by("created_at", direction="DESCENDING")
+          .limit(limit)
+          .stream()
+    )
+    messages = [{"message_id": d.id} | (d.to_dict() or {}) for d in docs]
+    return list(reversed(messages))
+
+
+@app.get("/chat/conversations/{user_id}")
+def get_conversations(user_id: str):
+    sent = db.collection("chats").where("participants", "array_contains", user_id).stream()
+
+    all_chats = db.collection("chats").stream()
+    conversations = []
+    for chat in all_chats:
+        if user_id in chat.id.split("__"):
+            other_id = [uid for uid in chat.id.split("__") if uid != user_id]
+            if other_id:
+                conversations.append(other_id[0])
+    return conversations

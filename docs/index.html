@@ -83,6 +83,22 @@
             <h2 class="sidebar-heading">Sugestões</h2>
             <ul id="suggestions-list" aria-label="Lista de sugestões"></ul>
         </aside>
+
+        <div id="chat-widget" style="display:none">
+            <div id="chat-box" class="hidden">
+                <div id="chat-header">
+                    <select id="chat-user-select">
+                        <option value="">Selecionar usuário…</option>
+                    </select>
+                </div>
+                <div id="chat-messages"></div>
+                <div id="chat-input-row">
+                    <input id="chat-input" type="text" placeholder="Mensagem…" maxlength="256" />
+                    <button id="chat-send-btn">Enviar</button>
+                </div>
+            </div>
+            <button id="chat-toggle-btn" title="Chat">💬</button>
+        </div>
     </main>
 
     <footer>

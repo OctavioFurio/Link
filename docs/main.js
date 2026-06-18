@@ -154,43 +154,6 @@ function updatePostUsername(postElement, username) {
     postElement.querySelector(".post-name").textContent = username;
 }
 
-// async function loadFeed() {
-//     const container = document.getElementById("posts-container");
-//     setFeedMessage(container, "Carregando...");
-    
-//     container.innerHTML = `
-//         <div style='padding:1rem;text-align:center'>
-//             <img src="Mink-run.gif" alt="Jink, a fuinha, saltando." style='width:200px'>
-//         </div>
-//     `;
- 
-//     try {
-//         const posts = await apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`);
-//         const likedIds = IS_LOGGED ? await apiFetch(`/users/${USER_ID}/likes`) : [];
-//         const likedSet = new Set(likedIds);
-
-//         container.innerHTML = "";
-//         if (!posts.length) {
-//             setFeedMessage(container, "Sem postagens ainda.");
-//             return;
-//         }
-
-//         const postElements = posts.map(post => {
-//             const render = renderPost(post, post.temp_username, likedSet.has(post.post_id));
-//             container.appendChild(render);
-//             return render;
-//         });
-
-//         posts.forEach(async (post, i) => {
-//             const userData = await apiFetch(`/users/${post.user_id}`);
-//             updatePostUsername(postElements[i], userData.username);
-//         });
-//     } catch (error) {
-//         console.error("Fail to load feed:", error);
-//         setFeedMessage(container, "Falha ao carregar postagens.");
-//     }
-// }
-
 async function loadSuggestions() {
     const list = document.getElementById("suggestions-list");
     setListMessage(list, "Carregando...");
@@ -327,4 +290,116 @@ function handleExit() {
 	localStorage.removeItem("user_id");
     localStorage.removeItem("username");	
     window.location.href = `${DOMAIN}/login`;
+}
+
+if (IS_LOGGED) {
+    const widget      = document.getElementById("chat-widget");
+    const chatBox     = document.getElementById("chat-box");
+    const toggleBtn   = document.getElementById("chat-toggle-btn");
+    const messagesDiv = document.getElementById("chat-messages");
+    const chatInput   = document.getElementById("chat-input");
+    const sendBtn     = document.getElementById("chat-send-btn");
+    const userSelect  = document.getElementById("chat-user-select");
+
+    let chatPollInterval = null;
+    let currentReceiver  = null;
+
+    widget.style.display = "flex";
+
+    // Abre/fecha o chat
+    toggleBtn.addEventListener("click", () => {
+        chatBox.classList.toggle("hidden");
+        if (!chatBox.classList.contains("hidden")) loadChatUsers();
+    });
+
+    // Troca de conversa
+    userSelect.addEventListener("change", () => {
+        currentReceiver = userSelect.value || null;
+        clearInterval(chatPollInterval);
+        messagesDiv.innerHTML = "";
+        if (currentReceiver) {
+            loadMessages();
+            chatPollInterval = setInterval(loadMessages, 3000); // polling a cada 3s
+        }
+    });
+
+    // Enviar mensagem
+    sendBtn.addEventListener("click", sendChatMessage);
+    chatInput.addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+    });
+
+    async function loadChatUsers() {
+        // Preenche o select com as sugestões já carregadas
+        try {
+            const users = await apiFetch(`/rec/users/${USER_ID}?top_k=20`);
+            userSelect.innerHTML = `<option value="">Selecionar usuário…</option>`;
+            users.forEach(u => {
+                if (u.user_id === USER_ID) return;
+                const opt = document.createElement("option");
+                opt.value = u.user_id;
+                opt.textContent = u.username ?? u.user_id;
+                userSelect.appendChild(opt);
+            });
+        } catch (e) {
+            console.error("Falha ao carregar usuários para chat:", e);
+        }
+    }
+
+    async function loadMessages() {
+        if (!currentReceiver) return;
+        try {
+            const msgs = await apiFetch(
+                `/chat/messages?user_a=${USER_ID}&user_b=${currentReceiver}`
+            );
+            renderMessages(msgs);
+        } catch (e) {
+            console.error("Falha ao carregar mensagens:", e);
+        }
+    }
+
+    function renderMessages(msgs) {
+        const atBottom =
+            messagesDiv.scrollHeight - messagesDiv.scrollTop <= messagesDiv.clientHeight + 40;
+
+        messagesDiv.innerHTML = "";
+        if (!msgs.length) {
+            messagesDiv.innerHTML = `<p style="color:var(--muted-text-color);font-size:var(--font-size-small);text-align:center">Nenhuma mensagem ainda.</p>`;
+            return;
+        }
+
+        msgs.forEach(msg => {
+            const mine = msg.sender_id === USER_ID;
+            const div = document.createElement("div");
+            div.className = `chat-msg ${mine ? "mine" : "theirs"}`;
+            div.innerHTML = `
+                ${!mine ? `<div class="msg-sender">${escHtml(msg.sender_id.slice(0,8))}…</div>` : ""}
+                ${escHtml(msg.content)}
+            `;
+            messagesDiv.appendChild(div);
+        });
+
+        if (atBottom) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function sendChatMessage() {
+        const content = chatInput.value.trim();
+        if (!content || !currentReceiver) return;
+        chatInput.value = "";
+        try {
+            await apiFetch("/chat/message", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    sender_id: USER_ID,
+                    receiver_id: currentReceiver,
+                    content,
+                }),
+            });
+            await loadMessages();
+        } catch (e) {
+            console.error("Falha ao enviar mensagem:", e);
+            toast("Falha ao enviar mensagem.");
+        }
+    }
 }

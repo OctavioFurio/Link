@@ -99,6 +99,17 @@ def get_user(user_id: str):
     return {"user_id": user_id} | (doc.to_dict() or {})
 
 
+@app.delete("user/{user_id}")
+def remove_user(user_id: str):
+    user_ref = db.collection("users").document(user_id)
+
+    if not user_ref.get().exists:
+        raise HTTPException(404, "User not found")
+
+    user_ref.delete()
+    return {"ok": True}
+
+
 @app.put("/users/{user_id}/colors")
 def set_user_mink_colors(user_id: str, colors: list[int]):
     user_ref = db.collection("users").document(user_id)

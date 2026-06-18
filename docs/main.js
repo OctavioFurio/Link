@@ -33,7 +33,7 @@ loadAll();
 
 function loadAll() {
     loadFeed();
-    loadSuggestions();
+    if (IS_LOGGED) loadSuggestions();
 }
 
 function updateProfBtn() {
@@ -59,10 +59,8 @@ async function loadFeed() {
     `;
  
     try {
-        const [posts, likedIds] = await Promise.all([
-            apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`),
-            apiFetch(`/users/${USER_ID}/likes`),
-        ]);
+        const posts = await apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`);
+        const likedIds = IS_LOGGED ? await apiFetch(`/users/${USER_ID}/likes`) : [];
         const likedSet = new Set(likedIds);
 
         container.innerHTML = "";
@@ -134,8 +132,10 @@ async function toggleLike(btn) {
     btn.disabled = true;
 
     try {
-        await apiFetch(`/posts/${postId}/like?user_id=${USER_ID}`, {
-            method: newLiked ? "POST" : "DELETE"
+        await apiFetch(`/posts/${postId}/like`, {
+            method: newLiked ? "POST" : "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: USER_ID }),
         });
         toast(newLiked ? "Curtido!" : "Descurtido!");
     } catch (error) {

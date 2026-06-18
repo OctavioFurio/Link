@@ -1,6 +1,6 @@
-fastapi
-uvicorn[standard]
-firebase-admin
 grpcio
+fastapi
 protobuf
 pydantic
+firebase-admin
+uvicorn[standard]

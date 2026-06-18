@@ -1,9 +1,10 @@
 import uuid
 import hashlib
+import secrets
 
 from typing import cast
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from firebase_client import db
@@ -13,8 +14,11 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 from rec_client import get_feed, get_user_suggestions
 
+OK = {"ok": True}
 MAX_POST_LEN = 256
+SENSITIVE_USER_FIELDS = ("hashed_password", "salt")
 DEFAULT_MINK_COLORS = [242, 236, 152, 242, 194, 154, 87, 154, 241]
+
 app = FastAPI()
 
 # TODO: LIMITAR!!!
@@ -32,25 +36,47 @@ class PostIn(BaseModel):
     temp_username: str
 
 
-class UserIn(BaseModel):
-    username: str
-    hashed_password: str
-
-
 class LoginIn(BaseModel):
     username: str
     password: str
 
 
-def _hash(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+class LikeIn(BaseModel):
+    user_id: str
+ 
+ 
+class ColorsIn(BaseModel):
+    colors: list[int]
+
+
+def _make_salt() -> str:
+    return secrets.token_hex(16)
+ 
+ 
+def _hash_password(password: str, salt: str) -> str:
+    return hashlib.sha256(f"{salt}{password}".encode()).hexdigest()
+ 
+ 
+def _verify_password(password: str, data: dict) -> bool:
+    salt = data.get("salt")
+    return data.get("hashed_password") == _hash_password(password, salt)
 
 
 def _get_doc(id: str, collection: str) -> DocumentSnapshot:
     doc = cast(DocumentSnapshot, db.collection(collection).document(id).get())
     if not doc.exists:
-        raise HTTPException(404)
+        raise HTTPException(404, f"{id} not found in {collection}")
     return doc
+
+
+def _serialize(id: str, id_key: str, doc: DocumentSnapshot) -> dict:
+    return {id_key: id} | (doc.to_dict() or {})
+
+
+def _serialize_user(id: str, doc: DocumentSnapshot) -> dict:
+    data = doc.to_dict() or {}
+    public_data = {k: v for k, v in data.items() if k not in SENSITIVE_USER_FIELDS}
+    return {"user_id": id} | public_data
 
 
 @app.post("/auth/signin")
@@ -66,7 +92,7 @@ def sigin(body: LoginIn):
 
     doc = results[0]
     data = doc.to_dict() or {}
-    if data.get("hashed_password") != _hash(body.password):
+    if not _verify_password(body.password, data):
         raise HTTPException(401, "Incorrect password")
 
     return {"user_id": doc.id, "username": data["username"]}
@@ -84,43 +110,38 @@ def signup(body: LoginIn):
         raise HTTPException(409, "Username already in use")
 
     uid = str(uuid.uuid4())
+    salt = _make_salt()
     db.collection("users").document(uid).set({
         "username": body.username,
-        "hashed_password": _hash(body.password),
+        "salt": salt,
+        "hashed_password": _hash_password(body.password, salt),
         "mink_colors": DEFAULT_MINK_COLORS,
         "created_at": SERVER_TIMESTAMP,
     })
+
     return {"user_id": uid, "username": body.username}
 
 
 @app.get("/users/{user_id}")
 def get_user(user_id: str):
     doc = _get_doc(user_id, "users")
-    return {"user_id": user_id} | (doc.to_dict() or {})
+    return _serialize_user(user_id, doc)
 
 
-@app.delete("user/{user_id}")
+@app.delete("/users/{user_id}")
 def remove_user(user_id: str):
-    user_ref = db.collection("users").document(user_id)
-
-    if not user_ref.get().exists:
-        raise HTTPException(404, "User not found")
-
-    user_ref.delete()
-    return {"ok": True}
+    _get_doc(user_id, "users")
+    db.collection("users").document(user_id).delete()
+    return OK
 
 
 @app.put("/users/{user_id}/colors")
-def set_user_mink_colors(user_id: str, colors: list[int]):
-    user_ref = db.collection("users").document(user_id)
-
-    if not user_ref.get().exists:
-        raise HTTPException(404, "User not found")
-
-    user_ref.update({
-        "mink_colors": colors
+def set_user_mink_colors(user_id: str, body: ColorsIn):
+    _get_doc(user_id, "users")
+    db.collection("users").document(user_id).update({
+        "mink_colors": body.colors
     })
-    return {"ok": True}
+    return OK
 
 
 @app.get("/users/{user_id}/colors")
@@ -136,7 +157,7 @@ def get_user_likes(user_id: str):
 
 
 @app.get("/users/search/{query}")
-def search_users(query: str, top_k: int = 5):
+def search_users(query: str, top_k: int = Query(default=5, ge=1, le=50)):
     results = (
         db.collection("users")
           .where("username", ">=", query)
@@ -144,11 +165,17 @@ def search_users(query: str, top_k: int = 5):
           .limit(top_k)
           .stream()
     )
-    return [{"user_id": d.id} | (d.to_dict() or {}) for d in results]
+    return [_serialize_user(d.id, d) for d in results]
 
 
 @app.post("/posts")
 def create_post(body: PostIn):
+    content = body.content.strip()
+    if not content:
+        raise HTTPException(400, "Post content cannot be empty")
+    if len(content) > MAX_POST_LEN:
+        raise HTTPException(400, f"Post content exceeds {MAX_POST_LEN} characters")
+
     pid = str(uuid.uuid4())
     db.collection("posts").document(pid).set({
         "user_id": body.user_id,
@@ -163,37 +190,35 @@ def create_post(body: PostIn):
 @app.get("/posts/{post_id}")
 def get_post(post_id: str):
     doc = _get_doc(post_id, "posts")
-    return {"post_id": post_id} | (doc.to_dict() or {})
+    return _serialize(post_id, "post_id", doc)
 
 
 @app.post("/posts/{post_id}/like")
-def like_post(post_id: str, user_id: str):
-    like_id = f"{user_id}_{post_id}"
-    like_ref = db.collection("likes").document(like_id)
+def like_post(post_id: str, body: LikeIn):
+    like_ref = db.collection("likes").document(f"{body.user_id}_{post_id}")
 
     if like_ref.get().exists:
         raise HTTPException(409, "Already liked")
 
-    like_ref.set({"user_id": user_id, "post_id": post_id, "created_at": SERVER_TIMESTAMP})
+    like_ref.set({"user_id": body.user_id, "post_id": post_id, "created_at": SERVER_TIMESTAMP})
     db.collection("posts").document(post_id).update({"likes_count": Increment(1)})
-    return {"ok": True}
+    return OK
 
 
 @app.delete("/posts/{post_id}/like")
-def unlike_post(post_id: str, user_id: str):
-    like_id = f"{user_id}_{post_id}"
-    like_ref = db.collection("likes").document(like_id)
+def unlike_post(post_id: str, body: LikeIn):
+    like_ref = db.collection("likes").document(f"{body.user_id}_{post_id}")
 
     if not like_ref.get().exists:
         raise HTTPException(404, "Like not found")
 
     like_ref.delete()
     db.collection("posts").document(post_id).update({"likes_count": Increment(-1)})
-    return {"ok": True}
+    return OK
 
 
 @app.get("/rec/feed/{user_id}")
-def rec_feed(user_id: str, top_k: int = 10):
+def rec_feed(user_id: str, top_k: int = Query(default=10, ge=1, le=100)):
     try:
         post_ids = get_feed(user_id, top_k)
     except Exception:
@@ -209,7 +234,7 @@ def rec_feed(user_id: str, top_k: int = 10):
 
 
 @app.get("/rec/users/{user_id}")
-def rec_users(user_id: str, top_k: int = 5):
+def rec_users(user_id: str, top_k: int = Query(default=5, ge=1, le=50)):
     try:
         user_ids = get_user_suggestions(user_id, top_k)
     except Exception:

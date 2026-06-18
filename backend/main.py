@@ -123,6 +123,7 @@ def create_post(body: PostIn):
         "user_id": body.user_id,
         "temp_username": body.temp_username,
         "content": body.content[:MAX_POST_LEN],
+        "likes_count": 0,
         "created_at": SERVER_TIMESTAMP,
     })
     return {"post_id": pid}

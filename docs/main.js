@@ -103,7 +103,7 @@ function renderPost(post, username, liked=false) {
         	<div class="post-content">${escHtml(post.content)}</div>
         		<div class="post-actions">
             	<button class="like-btn${liked ? " liked" : ""}" data-id="${post.post_id}">
-                	${liked ? "♥" : "♡"}
+                	${liked ? "♥" : "♡"} ${post.likes_count}
             	</button>
         	</div>
 		`;

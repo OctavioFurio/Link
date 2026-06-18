@@ -99,7 +99,7 @@ function renderPost(post, username, liked=false) {
     card.className = "post-card";
 	if(IS_LOGGED) {
         card.innerHTML = `
-            <div class="post-meta">${username}</div>
+            <div class="post-meta"><a class="post-name">${username}</a></div>
             <div class="post-content">${escHtml(post.content)}</div>
             <div class="post-actions">
                 <button class="like-btn${liked ? " liked" : ""}" 
@@ -114,7 +114,7 @@ function renderPost(post, username, liked=false) {
 	}
 	else {
 		card.innerHTML = `
-			<div class="post-meta">${username}</div>
+			<div class="post-meta"><a class="post-name">${username}</a></div>
 			<div class="post-content">${escHtml(post.content)}</div>
 		`;
 	}
@@ -151,7 +151,7 @@ async function toggleLike(btn) {
 }
 
 function updatePostUsername(postElement, username) {
-    postElement.querySelector(".post-meta").textContent = username;
+    postElement.querySelector(".post-name").textContent = username;
 }
 
 async function loadSuggestions() {

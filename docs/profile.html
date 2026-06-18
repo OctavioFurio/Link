@@ -22,11 +22,11 @@
             <canvas id="pfp-canvas" width="140" height="140"></canvas>
             <div class="inspector">
                 <div class="color-row">
-                    <label for="color0">Pelo - Principal</label>
+                    <label for="color0">Cor Principal</label>
                     <input type="color" id="color0" value="#f2ec98">
                 </div>
                 <div class="color-row">
-                    <label for="color1">Pelo - Secundário</label>
+                    <label for="color1">Cor Secundária</label>
                     <input type="color" id="color1" value="#f2c29a">
                 </div>
                 <div class="color-row">
@@ -38,7 +38,14 @@
                     <button id="save-colors">Salvar Mink</button>
                 </div>
             </div>
-
+            <div class="bio-section">
+                <label for="bio-input" class="sr-only">Bio</label>
+                <textarea id="bio-input" maxlength="160" placeholder="Conte um pouco sobre você..."></textarea>
+                <div class="bio-footer">
+                    <span id="bio-count">0/256</span>
+                    <button id="save-bio">Salvar bio</button>
+                </div>
+            </div>
             <button id="profile-btn">Customizar Mink</button>
         </section>
         

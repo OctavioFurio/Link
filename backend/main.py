@@ -148,6 +148,19 @@ def like_post(post_id: str, user_id: str):
     return {"ok": True}
 
 
+@app.delete("/posts/{post_id}/like")
+def unlike_post(post_id: str, user_id: str):
+    like_id = f"{user_id}_{post_id}"
+    like_ref = db.collection("likes").document(like_id)
+
+    if not like_ref.get().exists:
+        raise HTTPException(404, "Like not found")
+
+    like_ref.delete()
+    db.collection("posts").document(post_id).update({"likes_count": Increment(-1)})
+    return {"ok": True}
+
+
 @app.get("/rec/feed/{user_id}")
 def rec_feed(user_id: str, top_k: int = 10):
     try:

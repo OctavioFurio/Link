@@ -98,19 +98,19 @@ function renderPost(post, username, liked=false) {
     const card = document.createElement("article");
     card.className = "post-card";
 	if(IS_LOGGED) {
-		card.innerHTML = `
-        	<div class="post-meta">${username}</div>
-        	<div class="post-content">${escHtml(post.content)}</div>
-        		<div class="post-actions">
-            	<button class="like-btn${liked ? " liked" : ""}" data-id="${post.post_id}">
-                	${liked ? "♥" : "♡"} ${post.likes_count}
-            	</button>
-        	</div>
-		`;
-		if (!liked) {
-        	card.querySelector(".like-btn").addEventListener("click", () => 
-            	likePost(post.post_id, card, post.likes_count));
-    	}
+        card.innerHTML = `
+            <div class="post-meta">${username}</div>
+            <div class="post-content">${escHtml(post.content)}</div>
+            <div class="post-actions">
+                <button class="like-btn${liked ? " liked" : ""}" 
+                        data-id="${post.post_id}" 
+                        data-likes="${post.likes_count}">
+                    ${liked ? "♥" : "♡"} ${post.likes_count}
+                </button>
+            </div>
+        `;
+        card.querySelector(".like-btn").addEventListener("click", (e) => 
+            toggleLike(e.currentTarget));
 	}
 	else {
 		card.innerHTML = `
@@ -121,20 +121,32 @@ function renderPost(post, username, liked=false) {
     return card;
 }
 
-async function likePost(postId, card, likes) {
-    const btn = card.querySelector(".like-btn");
-    btn.classList.add("liked"); 
-    btn.textContent = `♥ ${likes + 1}`;
-    btn.onclick = null;
+async function toggleLike(btn) {
+    const postId = btn.dataset.id;
+    const wasLiked = btn.classList.contains("liked");
+    const likes = Number(btn.dataset.likes);
+    const newLiked = !wasLiked;
+    const newLikes = wasLiked ? likes - 1 : likes + 1;
+
+    btn.classList.toggle("liked", newLiked);
+    btn.textContent = `${newLiked ? "♥" : "♡"} ${newLikes}`;
+    btn.dataset.likes = newLikes;
+    btn.disabled = true;
 
     try {
-        await apiFetch(`/posts/${postId}/like?user_id=${USER_ID}`, { method: "POST" });
-        toast("Curtido!");
+        await apiFetch(`/posts/${postId}/like?user_id=${USER_ID}`, {
+            method: newLiked ? "POST" : "DELETE"
+        });
+        toast(newLiked ? "Curtido!" : "Descurtido!");
     } catch (error) {
-        console.error(`Fail to like post ${postId}:`, error);
-        btn.classList.remove("liked");
-        btn.textContent = `♡ ${likes}`;
-        btn.onclick = () => likePost(postId, card);
+        console.error(`Fail to toggle like on post ${postId}:`, error);
+        toast(newLiked ? "Falha ao curtir, tente novamente." : "Falha ao descurtir, tente novamente.");
+
+        btn.classList.toggle("liked", wasLiked);
+        btn.textContent = `${wasLiked ? "♥" : "♡"} ${likes}`;
+        btn.dataset.likes = likes;
+    } finally {
+        btn.disabled = false;
     }
 }
 
@@ -158,7 +170,7 @@ async function loadSuggestions() {
         users.forEach(user => list.appendChild(renderUserLi(user)));
     } catch (error) {
         console.error("Fail to load suggestions:", error);
-        setListMessage(list, "Falha ao carregar sugestões!");
+        setListMessage(list, "Falha ao carregar sugestões.");
     }
 }
 
@@ -191,7 +203,7 @@ async function handleNewPost() {
         loadFeed();
     } catch (error) {
         console.error("Fail to post:", error);
-        toast("Falha ao publicar!");
+        toast("Falha ao publicar, tente novamente.");
     }
 }
  
@@ -219,7 +231,7 @@ async function handleSearch() {
     } catch (error) {
         console.error("Fail to search users:", error);
         setListMessage(list, "Sem resultados.");
-        toast("Falha ao procurar usuários!");
+        toast("Falha ao procurar usuários, tente novamente.");
     }
 }
 

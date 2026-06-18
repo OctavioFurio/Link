@@ -73,14 +73,12 @@ def unfollow(user_id: str, body: FollowIn):
 
 @router.put("/{user_id}/bio")
 def set_user_bio(user_id: str, body: BioIn):
-    _get_doc(user_id, "users")
-    db.collection("users").document(user_id).update({
-        "bio": body.bio.strip()[:MAX_LEN]
-    })
+    get_doc("users", user_id)
+    col("users").document(user_id).update({"bio": body.bio.strip()[:MAX_LEN]})
     return OK
 
 
 @router.get("/{user_id}/bio")
 def get_user_bio(user_id: str):
-    doc = _get_doc(user_id, "users")
+    doc = get_doc("users", user_id)
     return {"bio": (doc.to_dict() or {}).get("bio", "")}

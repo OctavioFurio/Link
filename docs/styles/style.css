@@ -105,7 +105,6 @@ input:focus, textarea:focus {
     border-color: var(--main-color);
     box-shadow: 0 0 0 3px rgba(87, 154, 242, 0.15);
 }
-/* Nielsen */
 input:user-invalid {
     border-color: var(--danger-color);
 }
@@ -129,13 +128,11 @@ button:hover {
 button:active {
     opacity: 0.75;
 }
-/* Nielsen */
 button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-/* Login et cetera */
 a#profile-btn {
     padding: 0.45rem 1rem;
     cursor: pointer;
@@ -234,7 +231,6 @@ main { min-height: 100vh; }
 }
 .sidebar li:last-child { border-bottom: none; }
 
-/* Nielsen */
 .follow-btn {
     padding: 0.25rem 0.7rem;
     font-size: var(--font-size-small);
@@ -267,7 +263,6 @@ main { min-height: 100vh; }
     border: 1px solid var(--border-color);
 }
 
-/* Nielsen */
 .compose-author {
     font-size: var(--font-size-small);
     color: var(--muted-text-color);
@@ -296,7 +291,6 @@ main { min-height: 100vh; }
     font-variant-numeric: tabular-nums;
 }
 
-/* Nielsen */
 #compose-count.near-limit { color: var(--accent-color); }
 #compose-count.at-limit   { color: var(--danger-color); }
 
@@ -341,7 +335,6 @@ main { min-height: 100vh; }
     gap: 0.5rem;
 }
 
-/* Nielsen */
 .like-btn {
     padding: 0.25rem 0.7rem;
     font-size: var(--font-size-small);
@@ -581,7 +574,7 @@ footer {
 }
 
 #chat-user-list li {
-    position: relative; /* já deve ter, só confirme */
+    position: relative;
 }
 
 .chat-badge {
@@ -603,7 +596,7 @@ footer {
 }
 
 #chat-toggle-btn {
-    position: relative; /* adicione isso */
+    position: relative;
 }
 
 #chat-notif-badge {

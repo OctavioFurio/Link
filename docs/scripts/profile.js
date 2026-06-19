@@ -1,6 +1,6 @@
 const USER_ID     = localStorage.getItem('user_id');
 const BIO_MAX_LEN = 256;
-const palette = new Uint8Array(9); // 3 cores RGB
+const palette = new Uint8Array(9);
 
 function updatePalette(i, hex) {
     const [r, g, b] = hex2rgb(hex);
@@ -208,8 +208,6 @@ async function loadProfileStats() {
 
 loadProfileStats();
 
-// Chat: a função já checa se a página tem a marcação do widget,
-// então é seguro chamar aqui mesmo que o profile.html ainda não a tenha.
 if (USER_ID) initChat(USER_ID);
 
 document.getElementById("exit-btn").addEventListener("click", handleExit);

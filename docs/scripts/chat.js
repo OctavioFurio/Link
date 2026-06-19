@@ -1,6 +1,3 @@
-// Widget de chat reutilizável. Chame initChat(userId) em qualquer página
-// que tenha a marcação do widget (#chat-widget e os elementos internos).
-// Se a página não tiver essa marcação, a função simplesmente não faz nada.
 function initChat(userId) {
     const widget = document.getElementById("chat-widget");
     if (!widget) return;
@@ -49,7 +46,6 @@ function initChat(userId) {
                 apiFetch(`/chat/conversations/${userId}`),
             ]);
 
-            // Une os dois sem repetir
             const allIds = [...new Set([...followingIds, ...conversationIds])];
 
             userList.innerHTML = "";
@@ -85,7 +81,6 @@ function initChat(userId) {
         clearInterval(chatPollInterval);
 
         loadMessages().then(() => {
-            // Marca como lido: salva a contagem atual
             const msgs = messagesDiv.querySelectorAll(".chat-msg");
             setSeenCount(uid, msgs.length);
             updateBadge(li, uid, msgs.length);
@@ -100,7 +95,6 @@ function initChat(userId) {
             const msgs = await apiFetch(`/chat/messages?user_a=${userId}&user_b=${currentReceiver}`);
             renderMessages(msgs);
 
-            // Conversa aberta = marcar como lido automaticamente
             setSeenCount(currentReceiver, msgs.length);
             const activeLi = userList.querySelector(`li[data-id="${currentReceiver}"]`);
             if (activeLi) updateBadge(activeLi, currentReceiver, msgs.length);
@@ -146,7 +140,6 @@ function initChat(userId) {
         }
     }
 
-    // Guarda quantas mensagens cada conversa tinha na última vez que foi vista
     function getSeenCount(uid) {
         return parseInt(localStorage.getItem(`chat_seen_${uid}`) || "0");
     }
@@ -154,7 +147,6 @@ function initChat(userId) {
         localStorage.setItem(`chat_seen_${uid}`, count);
     }
 
-    // Atualiza o badge de uma li
     function updateBadge(li, uid, totalCount) {
         const seen    = getSeenCount(uid);
         const unread  = totalCount - seen;
@@ -173,7 +165,6 @@ function initChat(userId) {
     }
 
     async function pollUnread() {
-        // Busca IDs mesmo com o chat fechado
         let monitoredIds = [];
         try {
             const [followingIds, conversationIds] = await Promise.all([
@@ -182,7 +173,6 @@ function initChat(userId) {
             ]);
             monitoredIds = [...new Set([...followingIds, ...conversationIds])];
         } catch {
-            // Se falhar, usa o que já está na lista visual
             monitoredIds = [...userList.querySelectorAll("li[data-id]")].map(li => li.dataset.id);
         }
 
@@ -192,7 +182,6 @@ function initChat(userId) {
                 const msgs = await apiFetch(`/chat/messages?user_a=${userId}&user_b=${uid}`);
                 totalUnread += Math.max(0, msgs.length - getSeenCount(uid));
 
-                // Atualiza badge na lista visual se o item já existir
                 const li = userList.querySelector(`li[data-id="${uid}"]`);
                 if (li) updateBadge(li, uid, msgs.length);
             } catch {}

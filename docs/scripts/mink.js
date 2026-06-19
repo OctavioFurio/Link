@@ -1,6 +1,3 @@
-// Carregamento e desenho do avatar "Mink". Usado tanto no editor de perfil
-// (canvas grande, recortado em círculo) quanto nos avatares pequenos do feed.
-
 const MINK_LAYER_SRCS = [
     'images/pfp/secondFur.png',
     'images/pfp/mainFur.png',
@@ -10,8 +7,6 @@ const MINK_LAYER_SRCS = [
 
 let minkLayersPromise = null;
 
-// Carrega as 4 camadas uma única vez e reaproveita a mesma promise
-// em todas as chamadas seguintes.
 function loadMinkLayers() {
     if (!minkLayersPromise) {
         minkLayersPromise = Promise.all(MINK_LAYER_SRCS.map(loadImage));
@@ -48,9 +43,6 @@ function paintLayer(targetCtx, img, w, h, rgb) {
     targetCtx.drawImage(tmp, 0, 0);
 }
 
-// colors: 9 valores [r0,g0,b0, r1,g1,b1, r2,g2,b2] (array comum ou Uint8Array)
-// layers: [secondFur, mainFur, bgEyes, outline], vindos de loadMinkLayers()
-// options.circular: recorta o resultado em círculo (usado no editor de perfil)
 function renderMink(canvas, colors, layers, { circular = false } = {}) {
     if (!colors || !layers || !canvas) return;
 

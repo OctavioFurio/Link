@@ -478,15 +478,28 @@ if (IS_LOGGED) {
     const notifBadge = document.getElementById("chat-notif-badge");
 
     async function pollUnread() {
-        const items = userList.querySelectorAll("li[data-id]");
-        let totalUnread = 0;
+        // Busca IDs mesmo com o chat fechado
+        let monitoredIds = [];
+        try {
+            const [followingIds, conversationIds] = await Promise.all([
+                apiFetch(`/users/${USER_ID}/followings`),
+                apiFetch(`/chat/conversations/${USER_ID}`),
+            ]);
+            monitoredIds = [...new Set([...followingIds, ...conversationIds])];
+        } catch {
+            // Se falhar, usa o que já está na lista visual
+            monitoredIds = [...userList.querySelectorAll("li[data-id]")].map(li => li.dataset.id);
+        }
 
-        await Promise.all([...items].map(async li => {
-            const uid = li.dataset.id;
+        let totalUnread = 0;
+        await Promise.all(monitoredIds.map(async uid => {
             try {
                 const msgs = await apiFetch(`/chat/messages?user_a=${USER_ID}&user_b=${uid}`);
-                updateBadge(li, uid, msgs.length);
                 totalUnread += Math.max(0, msgs.length - getSeenCount(uid));
+
+                // Atualiza badge na lista visual se o item já existir
+                const li = userList.querySelector(`li[data-id="${uid}"]`);
+                if (li) updateBadge(li, uid, msgs.length);
             } catch {}
         }));
 

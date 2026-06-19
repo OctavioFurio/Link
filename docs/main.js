@@ -31,12 +31,18 @@ else {
 }
 loadAll();
 
-const minkLayers = await Promise.all([
-    loadImage('pfp/secondFur.png'),
-    loadImage('pfp/mainFur.png'),
-    loadImage('pfp/bg&eyes.png'),
-    loadImage('pfp/outline.png'),
-]);
+let minkLayers = null;
+
+async function loadMinkAssets() {
+    minkLayers = await Promise.all([
+        loadImage('pfp/secondFur.png'),
+        loadImage('pfp/mainFur.png'),
+        loadImage('pfp/bg&eyes.png'),
+        loadImage('pfp/outline.png'),
+    ]);
+}
+
+loadMinkAssets();
 
 function drawPostMink(canvas, colors) {
     if (!colors) return;

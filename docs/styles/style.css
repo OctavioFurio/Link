@@ -9,6 +9,7 @@
     --foreground-color: #0d1a3a;
     --muted-text-color: #6b8ab5;
     --default-text-color: #dce8fb;
+    --shadow-color: rgba(0,0,0,0.5);
 
     --border-radius: 10px;
 
@@ -63,7 +64,7 @@ input, textarea {
 input:focus, textarea:focus {
     outline: none;
     border-color: var(--main-color);
-    box-shadow: 0 0 0 3px rgba(87, 154, 242, 0.15);
+    box-shadow: 0 0 0 3px var(--shadow-color);
 }
 input:user-invalid {
     border-color: var(--danger-color);
@@ -140,8 +141,8 @@ button:disabled {
     pointer-events: none;
 }
 .toast.hidden  { opacity: 0; }
-.toast.error   { background: var(--danger-color); color: #fff; }
-.toast.warning { background: var(--accent-color); color: #060d1f; }
+.toast.error   { background: var(--danger-color); color: var(--default-text-color); }
+.toast.warning { background: var(--accent-color); color: var(--background-color); }
 
 footer {
     padding: 1.5rem 0;
@@ -351,7 +352,6 @@ a#profile-btn {
 .like-btn {
     padding: 0.25rem 0.7rem;
     font-size: var(--font-size-small);
-    background: transparent;
     color: var(--muted-text-color);
     border: 1px solid var(--border-color);
     display: flex;
@@ -359,17 +359,12 @@ a#profile-btn {
     gap: 0.3rem;
 }
 .like-btn:hover {
-    background: transparent;
     color: var(--main-color);
     border-color: var(--main-color);
 }
 .like-btn.liked {
     color: var(--danger-color);
     border-color: var(--danger-color);
-    background: rgba(242, 100, 87, 0.08);
-}
-.like-btn.liked:hover {
-    background: transparent;
 }
 
 .follow-btn {
@@ -408,7 +403,7 @@ a#profile-btn {
     height: 52px;
     border-radius: 50%;
     padding: 0;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 16px var(--shadow-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -423,8 +418,8 @@ a#profile-btn {
     padding: 0 4px;
     border-radius: 99px;
     background: var(--danger-color);
-    color: #fff;
-    font-size: 0.65rem;
+    color: var(--default-text-color);
+    font-size: var(--font-size-small);
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -439,7 +434,7 @@ a#profile-btn {
     background: var(--foreground-color);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 32px var(--shadow-color);
     overflow: hidden;
 }
 #chat-box.hidden { display: none; }
@@ -494,8 +489,8 @@ a#profile-btn {
     padding: 0 4px;
     border-radius: 99px;
     background: var(--danger-color);
-    color: #fff;
-    font-size: 0.65rem;
+    color: var(--default-text-color);;
+    font-size: var(--font-size-small);
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -621,14 +616,14 @@ a#profile-btn {
 }
 
 .profile-stats strong {
-    font-size: 1.4rem;
+    font-size: var(--font-size-large);
     font-weight: 700;
-    color: #fff;
+    color: var(--default-text-color);
 }
 
 .profile-stats span {
-    font-size: 0.9rem;
-    color: #9fb2d8;
+    font-size: var(--font-size-medium);
+    color: var(--muted-text-color);
 }
 
 .profile-bio {
@@ -683,7 +678,7 @@ a#profile-btn {
 .section-title {
     margin-top: 2rem;
     margin-bottom: 1rem;
-    font-size: 1.2rem;
+    font-size: var(--font-size-large);
     font-weight: 700;
 }
 
@@ -704,7 +699,7 @@ a#profile-btn {
 #inspector-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--shadow-color);
     z-index: 999;
 }
 
@@ -718,7 +713,7 @@ a#profile-btn {
     background: var(--foreground-color);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 32px var(--shadow-color);
     z-index: 1000;
 }
 

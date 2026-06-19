@@ -188,6 +188,11 @@ function renderPost(post, username, liked=false) {
             </div>
         ` : ""}
     `;
+
+    if (IS_LOGGED) {
+        card.querySelector(".like-btn")?.addEventListener("click", (e) => 
+            toggleLike(e.currentTarget));
+    }
     return card;
 }
 

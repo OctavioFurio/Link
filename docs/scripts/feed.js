@@ -29,7 +29,6 @@ function loadLogged() {
 
 	document.getElementById("post-btn").addEventListener("click", handleNewPost);
 	document.getElementById("search-btn").addEventListener("click", handleSearch);
-	document.getElementById("exit-btn").addEventListener("click", handleExit);
 	COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
 
     initChat(USER_ID);

@@ -211,3 +211,5 @@ loadProfileStats();
 // Chat: a função já checa se a página tem a marcação do widget,
 // então é seguro chamar aqui mesmo que o profile.html ainda não a tenha.
 if (USER_ID) initChat(USER_ID);
+
+document.getElementById("exit-btn").addEventListener("click", handleExit);

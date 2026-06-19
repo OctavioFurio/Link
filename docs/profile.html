@@ -12,6 +12,20 @@
         <a href="./">
             <img src="images/Jink.png" alt="Link - Perfil" class="logo-img" />
         </a>
+        <nav aria-label="Navegação principal"></nav>
+        	<button id="exit-btn" class="btn-icon" aria-label="Sair">
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" width="32" height="32" 
+                    viewBox="0 0 24 24" fill="none" stroke="#ffffff" 
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round" 
+                    class="svg-icon"
+                >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
+        </nav>
     </header>
     <main class="main-content profile-page" id="main">
         <section class="feed" aria-label="Aba de perfil">
@@ -77,14 +91,44 @@
         </section>
 
         <section id="user-posts"></section>
+
+        <div id="chat-widget" style="display:none">
+            <div id="chat-box" class="hidden">
+                <div id="chat-sidebar">
+                    <div id="chat-sidebar-heading">Conversas</div>
+                    <ul id="chat-user-list"></ul>
+                </div>
+                <div id="chat-main">
+                    <div id="chat-header">
+                        <span id="chat-receiver-name">Selecione alguém</span>
+                    </div>
+                    <div id="chat-messages"></div>
+                    <div id="chat-input-row">
+                        <input id="chat-input" type="text" placeholder="Mensagem…" maxlength="512" />
+                        <button id="chat-send-btn">Enviar</button>
+                    </div>
+                </div>
+            </div>
+            <button id="chat-toggle-btn" class="btn-icon" title="Chat">
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" width="32" height="32" 
+                    viewBox="0 0 24 24" fill="none" stroke="#ffffff" 
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round" 
+                    class="svg-icon">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span id="chat-notif-badge" style="display:none"></span>
+            </button>
+        </div>
     </main>
+
+    <div id="toast" class="toast hidden"></div>
+
     <footer>
         <p class="footnote">
             Feito por Murilo e Octávio exclusivamente para fins acadêmicos.
         </p>
     </footer>
-
-    <div id="toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <div id="inspector-backdrop" class="is-hidden" aria-hidden="true"></div>
     <div id="inspector-modal" class="is-hidden" role="dialog" aria-modal="true" aria-label="Customizar Mink">

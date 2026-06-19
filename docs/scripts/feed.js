@@ -9,10 +9,22 @@ const IS_LOGGED = USER_ID && USER_ID != "undefined";
 const COMPOSE_TEXTAREA = document.getElementById("post-input");
 
 let feedOffset = 0;
-let feedLoading = false;
 let feedEnded = false;
+let feedLoading = false;
 
-if (IS_LOGGED) {
+let minkLayers = null;
+
+(IS_LOGGED ? loadLogged : loadNotLogged)();
+
+loadFeed(true);
+loadMinkLayers().then(layers => { minkLayers = layers; });
+
+window.addEventListener("scroll", () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) 
+        loadFeed();
+});
+
+function loadLogged() {
     updateProfBtn();
 
 	document.getElementById("post-btn").addEventListener("click", handleNewPost);
@@ -21,8 +33,10 @@ if (IS_LOGGED) {
 	COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
 
     initChat(USER_ID);
+    loadSuggestions();
 }
-else {
+
+function loadNotLogged() {
   	document.querySelector('.main-content').style.gridTemplateColumns = '1fr';
   	document.querySelector('.sidebar').style.display = 'none';
   	document.querySelector('#search-input').style.display = 'none';
@@ -33,24 +47,11 @@ else {
 	compose.classList.remove('compose');
 	compose.classList.add('footnote');
 	compose.innerHTML = "Faça login para criar, interagir e conectar!";
-
 }
-loadAll();
-
-// Avatar Mink dos posts (camadas carregadas uma vez, desenho feito por mink.js)
-let minkLayers = null;
-loadMinkLayers().then(layers => { minkLayers = layers; });
 
 function drawPostMink(canvas, colors) {
     if (!colors || !minkLayers || !canvas) return;
     renderMink(canvas, colors, minkLayers);
-}
-
-function loadAll() {
-    loadFeed(true);
-
-    if (IS_LOGGED)
-        loadSuggestions();
 }
 
 function updateProfBtn() {
@@ -169,35 +170,25 @@ function setFeedMessage(container, message) {
 function renderPost(post, username, liked=false) {
     const card = document.createElement("article");
     card.className = "post-card";
-	if(IS_LOGGED) {
-        card.innerHTML = `
-            <div class="post-meta">
-                <canvas class="post-mink" width="36" height="36"></canvas>
-                <span class="post-author">${username}</span>
-                | ${timeAgo(post.created_at)}
-            </div>
-            <div class="post-content">${escHtml(post.content)}</div>
+
+    card.innerHTML = `
+        <div class="post-meta">
+            <canvas class="post-mink" width="36" height="36"></canvas>
+            <span class="post-author">${username}</span>
+            | ${timeAgo(post.created_at)}
+        </div>
+        <div class="post-content">${escHtml(post.content)}</div>
+
+        ${IS_LOGGED ? `
             <div class="post-actions">
-                <button class="like-btn${liked ? " liked" : ""}" 
-                        data-id="${post.post_id}" 
+                <button class="like-btn${liked ? " liked" : ""}"
+                        data-id="${post.post_id}"
                         data-likes="${post.likes_count}">
                     ${liked ? "♥" : "♡"} ${post.likes_count}
                 </button>
             </div>
-        `;
-        card.querySelector(".like-btn").addEventListener("click", (e) => 
-            toggleLike(e.currentTarget));
-	}
-	else {
-		card.innerHTML = `
-            <div class="post-meta">
-                <canvas class="post-mink" width="36" height="36"></canvas>
-                <span class="post-author">${username}</span>
-                | ${timeAgo(post.created_at)}
-            </div>
-			<div class="post-content">${escHtml(post.content)}</div>
-		`;
-	}
+        ` : ""}
+    `;
     return card;
 }
 
@@ -367,12 +358,3 @@ function handleInputCounter() {
         charCount.style.fontWeight = "normal";
     }
 }
-
-window.addEventListener("scroll", () => {
-    if (
-        window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 400
-    ) {
-        loadFeed();
-    }
-});

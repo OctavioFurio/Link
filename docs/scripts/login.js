@@ -1,14 +1,22 @@
 const LOGIN_TIMER_MS = 800;
 
-let activeAction = "signin";
-
-document.getElementById("signin-btn").addEventListener("click", () => {
-    activeAction = "signin";
-});
-
-document.getElementById("signup-btn").addEventListener("click", () => {
-    activeAction = "signup";
-});
+const TEXTS = {
+    signin: {
+        button: "Entrar",
+        loading: "Entrando...",
+        success: "Bem-vindo de volta!",
+        fail: "Falha ao entrar.",
+        invalid: "Usuário ou senha incorreto(s)!",
+    },
+    signup: {
+        button: "Cadastrar",
+        loading: "Cadastrando...",
+        success: "Conta criada!",
+        fail: "Falha ao cadastrar.",
+        invalid: "Falha, usuário já cadastrado!",
+    },
+    fill: "Preencha todos os campos.",
+};
 
 document.querySelector(".login-form").addEventListener("submit", handleSubmit);
 
@@ -19,34 +27,35 @@ async function handleSubmit(e) {
     const password = document.getElementById("password-input").value;
 
     if (!username || !password) {
-        toast("Preencha todos os campos.");
+        toast(TEXTS.fill);
         return;
     }
 
-    const isSignin = activeAction === "signin";
+    const action = e.submitter?.id === "signup-btn" ? "signup" : "signin";
+
+    const actionTexts = TEXTS[action];
+    const isSignin = action === "signin";
     const btn = document.getElementById(isSignin ? "signin-btn" : "signup-btn");
 
     btn.disabled = true;
-    btn.textContent = isSignin ? "Entrando..." : "Cadastrando...";
+    btn.textContent = actionTexts.loading;
 
     try {
-        const res = await fetch(`${API}/auth/${activeAction}`, {
+        const res = await fetch(`${API}/auth/${action}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
         });
 
         if (!res.ok) {
-            toast(isSignin ? "Usuário ou senha incorreto(s)!" : "Falha, usuário já cadastrado!");
+            toast(actionTexts.invalid);
             return;
         }
 
         const data = await res.json();
 
-        localStorage.setItem("user_id", data.user_id);
-        localStorage.setItem("username", data.username);
-
-        toast(isSignin ? "Bem-vindo de volta!" : "Conta criada!");
+        setLocalStorage(data);
+        toast(actionTexts.success);
 
         setTimeout(() => {
             window.location.href = DOMAIN;
@@ -54,9 +63,9 @@ async function handleSubmit(e) {
 
     } catch (error) {
         console.error("Auth error:", error);
-        toast(isSignin ? "Falha ao entrar." : "Falha ao Cadastrar.");
+        toast(actionTexts.fail);
     } finally {
         btn.disabled = false;
-        btn.textContent = isSignin ? "Entrar" : "Cadastrar";
+        btn.textContent = actionTexts.button;
     }
 }

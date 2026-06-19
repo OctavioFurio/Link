@@ -1,12 +1,12 @@
 :root {
-    --background-color: #060d1f;
-    --foreground-color: #0d1a3a;
-    --border-color: #1a2f5e;
     --main-color: #579AF2;
     --accent-color: #F2EC99;
     --danger-color: #F26457;
-    --default-text-color: #dce8fb;
+    --border-color: #1a2f5e;
+    --background-color: #060d1f;
+    --foreground-color: #0d1a3a;
     --muted-text-color: #6b8ab5;
+    --default-text-color: #dce8fb;
 
     --border-radius: 10px;
 
@@ -24,7 +24,6 @@
     padding: 0;
 }
 
-/* Nielsen */
 :focus-visible {
     outline: 2px solid var(--main-color);
     outline-offset: 3px;

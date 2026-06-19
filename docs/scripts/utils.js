@@ -45,6 +45,11 @@ function timeAgo(isoString) {
     return new Date(isoString).toLocaleDateString("pt-BR");
 }
 
+function setLocalStorage(userData) {
+    localStorage.setItem("user_id", userData.user_id);
+    localStorage.setItem("username", userData.username);
+}
+
 function handleExit() {
     localStorage.removeItem("user_id");
     localStorage.removeItem("username");

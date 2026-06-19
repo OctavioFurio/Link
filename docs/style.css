@@ -746,6 +746,74 @@ footer {
     margin-top: 0.5rem;
 }
 
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin: 1rem 0 1.5rem;
+    text-align: center;
+}
+
+.profile-stats > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-stats strong {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.profile-stats span {
+    font-size: 0.9rem;
+    color: #9fb2d8;
+}
+
+.profile-bio {
+    margin: 1rem 0;
+    line-height: 1.5;
+    color: #d9e6ff;
+}
+
+.profile-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+#user-posts {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.post-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.post-card p {
+    margin: 0 0 .75rem;
+    line-height: 1.5;
+}
+
+.post-card small {
+    color: #9fb2d8;
+}
+
+.section-title {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
 .color-row {
     display: flex;
     justify-content: space-between;

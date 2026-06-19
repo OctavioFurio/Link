@@ -16,50 +16,67 @@
     <main class="main-content profile-page" id="main">
         <section class="feed" aria-label="Aba de perfil">
             <div class="profile-card">
-
                 <div class="profile-top">
-                    <div class="mink-popup-wrapper">
-                        <canvas id="pfp-canvas" width="140" height="140"></canvas>
-                    </div>
-                    <button id="profile-btn" class="btn-ghost">Customizar Mink</button>
-                </div>
+                    <div class="profile-left">
+                        <div class="mink-popup-wrapper">
+                            <canvas id="pfp-canvas" width="140" height="140"></canvas>
+                        </div>
 
-                <h2 id="profile-name"></h2>
+                        <div class="profile-info">
+                            <h2 id="profile-name"></h2>
 
-                <div class="profile-stats">
-                    <div>
-                        <strong id="followers-count">0</strong>
-                        <span>Seguidores</span>
+                            <div class="profile-stats">
+                                <div>
+                                    <strong id="followers-count">0</strong>
+                                    <span>Seguidores</span>
+                                </div>
+
+                                <div>
+                                    <strong id="following-count">0</strong>
+                                    <span>Seguindo</span>
+                                </div>
+
+                                <div>
+                                    <strong id="likes-count">0</strong>
+                                    <span>Curtidas</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <strong id="following-count">0</strong>
-                        <span>Seguindo</span>
-                    </div>
+                    <button id="profile-btn" class="btn-ghost">
+                        Customizar Mink
+                    </button>
 
-                    <div>
-                        <strong id="likes-count">0</strong>
-                        <span>Curtidas</span>
-                    </div>
                 </div>
 
                 <div class="bio-view">
-                    <p id="bio-text"></p>
-                    <button id="edit-bio-btn" class="btn-ghost">Editar bio</button>
+                    <p id="bio-text" class="profile-bio"></p>
+                    <button id="edit-bio-btn" class="btn-ghost">
+                        Editar bio
+                    </button>
                 </div>
 
                 <div class="bio-section is-hidden">
                     <label for="bio-input" class="sr-only">Bio</label>
-                    <textarea id="bio-input" maxlength="256" placeholder="Conte um pouco sobre você..."></textarea>
+
+                    <textarea
+                        id="bio-input"
+                        maxlength="256"
+                        placeholder="Conte um pouco sobre você..."
+                    ></textarea>
+
                     <div class="bio-footer">
                         <span id="bio-count">0/256</span>
                         <button id="save-bio">Salvar bio</button>
                     </div>
                 </div>
 
-                <section id="user-posts"></section>
+                <h3 class="section-title">Posts</h3>
             </div>
         </section>
+
+        <section id="user-posts"></section>
     </main>
     <footer>
         <p class="footnote">

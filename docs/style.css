@@ -644,6 +644,28 @@ footer {
     justify-content: center;
 }
 
+#chat-toggle-btn {
+    position: relative; /* adicione isso */
+}
+
+#chat-notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 99px;
+    background: var(--danger-color);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
 @media (max-width: 640px) {
     #chat-box { width: calc(100vw - 3rem); }
     #chat-sidebar { width: 100px; }

@@ -322,6 +322,9 @@ if (IS_LOGGED) {
 
     widget.style.display = "flex";
 
+    pollUnread();
+    const globalUnreadInterval = setInterval(pollUnread, 10000);
+
     let unreadInterval = null;
 
     toggleBtn.addEventListener("click", () => {
@@ -344,15 +347,21 @@ if (IS_LOGGED) {
     async function loadChatUsers() {
         userList.innerHTML = `<li style="color:var(--muted-text-color)">Carregando…</li>`;
         try {
-            const followingIds = await apiFetch(`/users/${USER_ID}/followings`);
-            userList.innerHTML = "";
+            const [followingIds, conversationIds] = await Promise.all([
+                apiFetch(`/users/${USER_ID}/followings`),
+                apiFetch(`/chat/conversations/${USER_ID}`),
+            ]);
 
-            if (!followingIds.length) {
+            // Une os dois sem repetir
+            const allIds = [...new Set([...followingIds, ...conversationIds])];
+
+            userList.innerHTML = "";
+            if (!allIds.length) {
                 userList.innerHTML = `<li style="color:var(--muted-text-color)">Ninguém ainda.</li>`;
                 return;
             }
 
-            await Promise.all(followingIds.map(async uid => {
+            await Promise.all(allIds.map(async uid => {
                 const userData = await apiFetch(`/users/${uid}`);
                 const li = document.createElement("li");
                 li.textContent = userData.username ?? uid;
@@ -360,6 +369,8 @@ if (IS_LOGGED) {
                 li.addEventListener("click", () => selectReceiver(uid, userData.username, li));
                 userList.appendChild(li);
             }));
+
+            pollUnread();
         } catch (e) {
             console.error("Falha ao carregar usuários:", e);
         }
@@ -464,15 +475,26 @@ if (IS_LOGGED) {
         }
     }
 
-    // Verifica não lidas de todos os usuários da lista
+    const notifBadge = document.getElementById("chat-notif-badge");
+
     async function pollUnread() {
         const items = userList.querySelectorAll("li[data-id]");
+        let totalUnread = 0;
+
         await Promise.all([...items].map(async li => {
             const uid = li.dataset.id;
             try {
                 const msgs = await apiFetch(`/chat/messages?user_a=${USER_ID}&user_b=${uid}`);
                 updateBadge(li, uid, msgs.length);
+                totalUnread += Math.max(0, msgs.length - getSeenCount(uid));
             } catch {}
         }));
+
+        if (totalUnread > 0) {
+            notifBadge.textContent = totalUnread > 99 ? "99+" : totalUnread;
+            notifBadge.style.display = "flex";
+        } else {
+            notifBadge.style.display = "none";
+        }
     }
 }

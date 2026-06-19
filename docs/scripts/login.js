@@ -27,7 +27,6 @@ async function handleSubmit(e) {
     const btn = document.getElementById(isSignin ? "signin-btn" : "signup-btn");
 
     btn.disabled = true;
-    btn.classList.add("button-selected");
     btn.textContent = isSignin ? "Entrando..." : "Cadastrando...";
 
     try {
@@ -58,7 +57,6 @@ async function handleSubmit(e) {
         toast(isSignin ? "Falha ao entrar." : "Falha ao Cadastrar.");
     } finally {
         btn.disabled = false;
-        btn.classList.remove("button-selected");
         btn.textContent = isSignin ? "Entrar" : "Cadastrar";
     }
 }

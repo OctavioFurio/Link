@@ -79,7 +79,7 @@ async function loadFeed(reset = false) {
 
         container.innerHTML = `
             <div style='padding:1rem;text-align:center'>
-                <img src="Mink-run.gif"
+                <img src="images/Mink-run.gif"
                      alt="Jink, a fuinha, saltando."
                      style='width:200px'>
             </div>
@@ -173,8 +173,8 @@ function renderPost(post, username, liked=false) {
         card.innerHTML = `
             <div class="post-meta">
                 <canvas class="post-mink" width="36" height="36"></canvas>
-                <span class="post-name">${username}</span>
-                <br> ${timeAgo(post.created_at)}
+                <span class="post-author">${username}</span>
+                | ${timeAgo(post.created_at)}
             </div>
             <div class="post-content">${escHtml(post.content)}</div>
             <div class="post-actions">
@@ -190,7 +190,11 @@ function renderPost(post, username, liked=false) {
 	}
 	else {
 		card.innerHTML = `
-			<div class="post-meta"><span class="post-name">${username}</span> | ${timeAgo(post.created_at)}</div>
+            <div class="post-meta">
+                <canvas class="post-mink" width="36" height="36"></canvas>
+                <span class="post-author">${username}</span>
+                | ${timeAgo(post.created_at)}
+            </div>
 			<div class="post-content">${escHtml(post.content)}</div>
 		`;
 	}
@@ -229,7 +233,7 @@ async function toggleLike(btn) {
 }
 
 function updatePostUsername(postElement, username) {
-    postElement.querySelector(".post-name").textContent = username;
+    postElement.querySelector(".post-author").textContent = username;
 }
 
 async function loadSuggestions() {

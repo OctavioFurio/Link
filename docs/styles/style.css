@@ -235,13 +235,6 @@ main { min-height: 100vh; }
 }
 .sidebar li:last-child { border-bottom: none; }
 
-.sidebar .user-name {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 /* Nielsen */
 .follow-btn {
     padding: 0.25rem 0.7rem;
@@ -337,17 +330,6 @@ main { min-height: 100vh; }
     flex-shrink: 0;
 }
 
-.post-author {
-    font-weight: 600;
-    font-size: var(--font-size-small);
-    color: var(--accent-color);
-}
-
-.post-time {
-    font-size: var(--font-size-small);
-    color: var(--muted-text-color);
-}
-
 .post-content {
     margin-bottom: 0.85rem;
     line-height: 1.6;
@@ -383,21 +365,6 @@ main { min-height: 100vh; }
 }
 .like-btn.liked:hover {
     background: transparent;
-}
-
-.post-likes {
-    font-size: var(--font-size-small);
-    color: var(--muted-text-color);
-}
-
-.state-msg {
-    padding: 2rem 1rem;
-    text-align: center;
-    color: var(--muted-text-color);
-    font-size: var(--font-size-small);
-    background: var(--foreground-color);
-    border-radius: var(--border-radius);
-    border: 1px dashed var(--border-color);
 }
 
 footer {
@@ -462,21 +429,6 @@ footer {
 }
 
 .login-btn { width: 18rem; }
-
-.tag {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 99px;
-    font-size: var(--font-size-small);
-    background: rgba(87, 154, 242, 0.15);
-    color: var(--main-color);
-    border: 1px solid rgba(87, 154, 242, 0.3);
-}
-.tag.yellow {
-    background: rgba(242, 236, 153, 0.12);
-    color: var(--accent-color);
-    border-color: rgba(242, 236, 153, 0.25);
-}
 
 #pfp-canvas {
     width: 140px;
@@ -715,20 +667,6 @@ footer {
 
 #pfp-canvas { cursor: pointer; }
 
-.mink-popup-wrapper .inspector {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 10;
-    margin-top: 0.5rem;
-    padding: 1rem;
-    width: 220px;
-    background: var(--foreground-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-}
-
 #profile-name {
     font-size: var(--font-size-large);
     font-weight: 600;
@@ -757,6 +695,7 @@ footer {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 0.75rem;
+    gap: 2rem;
 }
 
 .profile-card #profile-name {
@@ -804,13 +743,6 @@ footer {
     margin: 1rem 0;
     line-height: 1.5;
     color: #d9e6ff;
-}
-
-.profile-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 2rem;
 }
 
 #user-posts {

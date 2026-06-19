@@ -2,10 +2,10 @@
 // (canvas grande, recortado em círculo) quanto nos avatares pequenos do feed.
 
 const MINK_LAYER_SRCS = [
-    'pfp/secondFur.png',
-    'pfp/mainFur.png',
-    'pfp/bg&eyes.png',
-    'pfp/outline.png',
+    'images/pfp/secondFur.png',
+    'images/pfp/mainFur.png',
+    'images/pfp/bg&eyes.png',
+    'images/pfp/outline.png',
 ];
 
 let minkLayersPromise = null;

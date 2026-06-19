@@ -15,13 +15,22 @@ def send_message(body: MessageIn):
     content = body.content.strip()
     if not content or len(content) > MAX_LEN:
         raise HTTPException(400, "Invalid message")
+
+    cid = chat_id(body.sender_id, body.receiver_id)
     mid = str(uuid.uuid4())
-    col("chats").document(chat_id(body.sender_id, body.receiver_id)) \
-                .collection("messages").document(mid).set({
-                    "sender_id":  body.sender_id,
-                    "content":    content,
-                    "created_at": SERVER_TIMESTAMP,
-                })
+
+    chat_ref = col("chats").document(cid)
+    if not chat_ref.get().exists:
+        chat_ref.set({
+            "participants": [body.sender_id, body.receiver_id],
+            "created_at":   SERVER_TIMESTAMP,
+        })
+
+    chat_ref.collection("messages").document(mid).set({
+        "sender_id":  body.sender_id,
+        "content":    content,
+        "created_at": SERVER_TIMESTAMP,
+    })
     return {"message_id": mid}
 
 
@@ -39,9 +48,10 @@ def get_messages(user_a: str, user_b: str, limit: int = Query(default=30, le=100
 
 @router.get("/conversations/{user_id}")
 def get_conversations(user_id: str):
+    docs = col("chats").where("participants", "array_contains", user_id).stream()
     return [
         other
-        for chat in col("chats").stream()
-        if user_id in (parts := chat.id.split("__"))
-        for other in parts if other != user_id
+        for doc in docs
+        for other in (doc.to_dict() or {}).get("participants", [])
+        if other != user_id
     ]

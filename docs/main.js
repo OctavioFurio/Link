@@ -44,6 +44,10 @@ function loadImage(src) {
 
 let minkLayers = null;
 
+let feedOffset = 0;
+let feedLoading = false;
+let feedEnded = false;
+
 async function loadMinkAssets() {
     minkLayers = await Promise.all([
         loadImage('pfp/secondFur.png'),
@@ -55,7 +59,6 @@ async function loadMinkAssets() {
 
 (async () => {
     await loadMinkAssets();
-    loadAll();
 })();
 
 function drawPostMink(canvas, colors) {

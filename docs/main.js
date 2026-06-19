@@ -100,8 +100,10 @@ function drawPostMink(canvas, colors) {
 }
 
 function loadAll() {
-    loadFeed();
-    if (IS_LOGGED) loadSuggestions();
+    loadFeed(true);
+
+    if (IS_LOGGED)
+        loadSuggestions();
 }
 
 function updateProfBtn() {
@@ -116,52 +118,97 @@ function updateProfBtn() {
     }
 }
 
-async function loadFeed() {
-    const container = document.getElementById("posts-container");
-    setFeedMessage(container, "Carregando...");
-    
-    container.innerHTML = `
-        <div style='padding:1rem;text-align:center'>
-            <img src="Mink-run.gif" alt="Jink, a fuinha, saltando." style='width:200px'>
-        </div>
-    `;
- 
-    try {
-        const posts = await apiFetch(`/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}`);
-        const likedIds = IS_LOGGED ? await apiFetch(`/users/${USER_ID}/likes`) : [];
-        const likedSet = new Set(likedIds);
+async function loadFeed(reset = false) {
+    if (feedLoading || feedEnded)
+        return;
 
-        container.innerHTML = "";
+    feedLoading = true;
+
+    const container = document.getElementById("posts-container");
+
+    if (reset) {
+        feedOffset = 0;
+        feedEnded = false;
+
+        container.innerHTML = `
+            <div style='padding:1rem;text-align:center'>
+                <img src="Mink-run.gif"
+                     alt="Jink, a fuinha, saltando."
+                     style='width:200px'>
+            </div>
+        `;
+    }
+
+    try {
+        const posts = await apiFetch(
+            `/rec/feed/${USER_ID}?top_k=${TOP_K_FEED}&offset=${feedOffset}`
+        );
+
         if (!posts.length) {
-            setFeedMessage(container, "Sem postagens ainda.");
+            feedEnded = true;
+
+            if (feedOffset === 0)
+                setFeedMessage(container, "Sem postagens ainda.");
+
             return;
         }
 
+        const likedIds = IS_LOGGED
+            ? await apiFetch(`/users/${USER_ID}/likes`)
+            : [];
+
+        const likedSet = new Set(likedIds);
+
+        if (reset)
+            container.innerHTML = "";
+
         const postElements = posts.map(post => {
-            const render = renderPost(post, post.temp_username, likedSet.has(post.post_id));
-            container.appendChild(render);
-            return render;
+            const el = renderPost(
+                post,
+                post.temp_username,
+                likedSet.has(post.post_id)
+            );
+
+            container.appendChild(el);
+
+            return el;
         });
 
         posts.forEach(async (post, i) => {
-            const userData = await apiFetch(`/users/${post.user_id}`);
+            try {
+                const userData =
+                    await apiFetch(`/users/${post.user_id}`);
 
-            updatePostUsername(
-                postElements[i],
-                userData.username
-            );
+                updatePostUsername(
+                    postElements[i],
+                    userData.username
+                );
 
-            const colorsData =
-                await apiFetch(`/users/${post.user_id}/colors`);
+                const colorsData =
+                    await apiFetch(`/users/${post.user_id}/colors`);
 
-            drawPostMink(
-                postElements[i].querySelector(".post-mink"),
-                colorsData.mink_colors
-            );
+                drawPostMink(
+                    postElements[i].querySelector(".post-mink"),
+                    colorsData.mink_colors
+                );
+            } catch {}
         });
+
+        feedOffset += posts.length;
+
+        if (posts.length < TOP_K_FEED)
+            feedEnded = true;
+
     } catch (error) {
         console.error("Fail to load feed:", error);
-        setFeedMessage(container, "Falha ao carregar postagens.");
+
+        if (feedOffset === 0)
+            setFeedMessage(
+                container,
+                "Falha ao carregar postagens."
+            );
+    } finally {
+        feedLoading = false;
     }
 }
 
@@ -332,7 +379,7 @@ async function handleNewPost() {
         input.value = "";
         input.dispatchEvent(new Event("input"));
         toast("Publicado!");
-        loadFeed();
+        loadFeed(true);
     } catch (error) {
         console.error("Fail to post:", error);
         toast("Falha ao publicar, tente novamente.");
@@ -595,3 +642,12 @@ if (IS_LOGGED) {
         }
     }
 }
+
+window.addEventListener("scroll", () => {
+    if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 400
+    ) {
+        loadFeed();
+    }
+});

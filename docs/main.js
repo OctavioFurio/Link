@@ -8,6 +8,10 @@ const IS_LOGGED = USER_ID && USER_ID != "undefined";
 
 const COMPOSE_TEXTAREA = document.getElementById("post-input");
 
+let feedOffset = 0;
+let feedLoading = false;
+let feedEnded = false;
+
 if (IS_LOGGED) {
     updateProfBtn();
 
@@ -43,10 +47,6 @@ function loadImage(src) {
 }
 
 let minkLayers = null;
-
-let feedOffset = 0;
-let feedLoading = false;
-let feedEnded = false;
 
 async function loadMinkAssets() {
     minkLayers = await Promise.all([

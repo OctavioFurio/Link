@@ -322,9 +322,18 @@ if (IS_LOGGED) {
 
     widget.style.display = "flex";
 
+    let unreadInterval = null;
+
     toggleBtn.addEventListener("click", () => {
         chatBox.classList.toggle("hidden");
-        if (!chatBox.classList.contains("hidden")) loadChatUsers();
+        if (!chatBox.classList.contains("hidden")) {
+            loadChatUsers().then(() => {
+                pollUnread();
+                unreadInterval = setInterval(pollUnread, 5000);
+            });
+        } else {
+            clearInterval(unreadInterval);
+        }
     });
 
     sendBtn.addEventListener("click", sendChatMessage);
@@ -366,7 +375,14 @@ if (IS_LOGGED) {
 
         messagesDiv.innerHTML = "";
         clearInterval(chatPollInterval);
-        loadMessages();
+
+        loadMessages().then(() => {
+            // Marca como lido: salva a contagem atual
+            const msgs = messagesDiv.querySelectorAll(".chat-msg");
+            setSeenCount(uid, msgs.length);
+            updateBadge(li, uid, msgs.length);
+        });
+
         chatPollInterval = setInterval(loadMessages, 3000);
     }
 
@@ -375,6 +391,11 @@ if (IS_LOGGED) {
         try {
             const msgs = await apiFetch(`/chat/messages?user_a=${USER_ID}&user_b=${currentReceiver}`);
             renderMessages(msgs);
+
+            // Conversa aberta = marcar como lido automaticamente
+            setSeenCount(currentReceiver, msgs.length);
+            const activeLi = userList.querySelector(`li[data-id="${currentReceiver}"]`);
+            if (activeLi) updateBadge(activeLi, currentReceiver, msgs.length);
         } catch (e) {
             console.error("Falha ao carregar mensagens:", e);
         }
@@ -415,5 +436,43 @@ if (IS_LOGGED) {
             console.error("Falha ao enviar mensagem:", e);
             toast("Falha ao enviar mensagem.");
         }
+    }
+
+    // Guarda quantas mensagens cada conversa tinha na última vez que foi vista
+    function getSeenCount(uid) {
+        return parseInt(localStorage.getItem(`chat_seen_${uid}`) || "0");
+    }
+    function setSeenCount(uid, count) {
+        localStorage.setItem(`chat_seen_${uid}`, count);
+    }
+
+    // Atualiza o badge de uma li
+    function updateBadge(li, uid, totalCount) {
+        const seen    = getSeenCount(uid);
+        const unread  = totalCount - seen;
+        let badge = li.querySelector(".chat-badge");
+
+        if (unread > 0) {
+            if (!badge) {
+                badge = document.createElement("span");
+                badge.className = "chat-badge";
+                li.appendChild(badge);
+            }
+            badge.textContent = unread > 99 ? "99+" : unread;
+        } else {
+            badge?.remove();
+        }
+    }
+
+    // Verifica não lidas de todos os usuários da lista
+    async function pollUnread() {
+        const items = userList.querySelectorAll("li[data-id]");
+        await Promise.all([...items].map(async li => {
+            const uid = li.dataset.id;
+            try {
+                const msgs = await apiFetch(`/chat/messages?user_a=${USER_ID}&user_b=${uid}`);
+                updateBadge(li, uid, msgs.length);
+            } catch {}
+        }));
     }
 }

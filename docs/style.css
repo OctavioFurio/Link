@@ -622,6 +622,28 @@ footer {
     font-size: var(--font-size-small);
 }
 
+#chat-user-list li {
+    position: relative; /* já deve ter, só confirme */
+}
+
+.chat-badge {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 99px;
+    background: var(--danger-color);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 @media (max-width: 640px) {
     #chat-box { width: calc(100vw - 3rem); }
     #chat-sidebar { width: 100px; }

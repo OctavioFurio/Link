@@ -62,6 +62,16 @@ def follow(user_id: str, body: FollowIn):
     return OK
 
 
+@router.get("/{user_id}/followers")
+def get_followers(user_id: str):
+    return [
+        d.to_dict()["follower_id"]
+        for d in col("follows")
+        .where("followed_id", "==", user_id)
+        .stream()
+    ]
+
+
 @router.delete("/{user_id}/follow")
 def unfollow(user_id: str, body: FollowIn):
     ref = col("follows").document(f"{user_id}_{body.user_id}")
@@ -69,6 +79,20 @@ def unfollow(user_id: str, body: FollowIn):
         raise HTTPException(404, "Not following")
     ref.delete()
     return OK
+
+
+@router.get("/{user_id}/likes_received")
+def likes_received(user_id: str):
+    total = 0
+
+    posts = col("posts") \
+        .where("user_id", "==", user_id) \
+        .stream()
+
+    for post in posts:
+        total += post.to_dict().get("likes_count", 0)
+
+    return {"likes": total}
 
 
 @router.put("/{user_id}/bio")

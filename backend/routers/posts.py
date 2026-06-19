@@ -52,3 +52,17 @@ def unlike_post(post_id: str, body: LikeIn):
     ref.delete()
     col("posts").document(post_id).update({"likes_count": Increment(-1)})
     return OK
+
+
+@router.get("/user/{user_id}")
+def get_posts_by_user(user_id: str):
+    docs = (
+        col("posts")
+        .where("user_id", "==", user_id)
+        .stream()
+    )
+
+    return [
+        doc_dict(d, "post_id")
+        for d in docs
+    ]

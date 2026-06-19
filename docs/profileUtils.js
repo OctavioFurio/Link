@@ -1,3 +1,4 @@
+const USER_ID     = localStorage.getItem('user_id');
 const BIO_MAX_LEN = 256;
 const palette = new Uint8Array(9); // 3 cores RGB
 
@@ -9,6 +10,12 @@ function hex2rgb(hex) {
         (n>>8)  &0xff, 
         n       &0xff
     ];
+}
+
+function rgb2hex(r, g, b) {
+    return "#" + [r,g,b]
+        .map(v => v.toString(16).padStart(2, "0"))
+        .join("");
 }
 
 function updatePalette(i, hex) {
@@ -94,10 +101,52 @@ const ctx = C.getContext('2d');
         a.click();
     });
 
-    document.getElementById('save-colors').addEventListener('click', () => {
-        console.log('Paleta:', palette);
-        alert(`Array de cores: ${Array.from(palette)}`);
+    document.getElementById('save-colors').addEventListener('click', async () => {
+        if (!USER_ID) {
+            toast('Faça login primeiro.');
+            return;
+        }
+
+        try {
+            await apiFetch(`/users/${USER_ID}/colors`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    colors: Array.from(palette)
+                })
+            });
+
+            toast('Mink salvo!');
+            closeInspector();
+
+        } catch {
+            toast('Erro ao salvar Mink.');
+        }
     });
+
+    if (USER_ID) {
+        try {
+            const data = await apiFetch(`/users/${USER_ID}/colors`);
+
+            if (data.mink_colors) {
+                const c = data.mink_colors;
+
+                const hex0 = rgb2hex(c[0], c[1], c[2]);
+                const hex1 = rgb2hex(c[3], c[4], c[5]);
+                const hex2 = rgb2hex(c[6], c[7], c[8]);
+
+                document.getElementById('color0').value = hex0;
+                document.getElementById('color1').value = hex1;
+                document.getElementById('color2').value = hex2;
+
+                updatePalette(0, hex0);
+                updatePalette(1, hex1);
+                updatePalette(2, hex2);
+            }
+        } catch {
+            console.error('Failed to load Mink colors');
+        }
+    }
 
     render();
 })();
@@ -142,7 +191,6 @@ const editBioBtn  = document.getElementById('edit-bio-btn');
 const bioInput    = document.getElementById('bio-input');
 const bioCount    = document.getElementById('bio-count');
 const saveBioBtn  = document.getElementById('save-bio');
-const USER_ID     = localStorage.getItem('user_id');
 
 profileName.textContent = localStorage.getItem('username') || 'Usuário';
 
@@ -179,3 +227,38 @@ saveBioBtn.addEventListener('click', () => {
         bioView.classList.remove('is-hidden');
     });
 });
+
+async function loadProfileStats() {
+    if (!USER_ID) return;
+
+    try {
+        const followers = await apiFetch(`/users/${USER_ID}/followers`);
+        const followings = await apiFetch(`/users/${USER_ID}/followings`);
+        const likes = await apiFetch(`/users/${USER_ID}/likes_received`);
+        const posts = await apiFetch(`/posts/user/${USER_ID}`);
+
+        document.getElementById('followers-count').textContent =
+            followers.length;
+
+        document.getElementById('following-count').textContent =
+            followings.length;
+
+        document.getElementById('likes-count').textContent =
+            likes.likes;
+
+        const postsContainer =
+            document.getElementById('user-posts');
+
+        postsContainer.innerHTML = posts.map(post => `
+            <article class="post-card">
+                <p>${escHtml(post.content)}</p>
+                <small> Curtidas: ${post.likes_count || 0}</small>
+            </article>
+        `).join('');
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+loadProfileStats();

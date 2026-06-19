@@ -31,6 +31,17 @@ else {
 }
 loadAll();
 
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+
+        img.src = src;
+    });
+}
+
 let minkLayers = null;
 
 async function loadMinkAssets() {
@@ -42,10 +53,13 @@ async function loadMinkAssets() {
     ]);
 }
 
-loadMinkAssets();
+(async () => {
+    await loadMinkAssets();
+    loadAll();
+})();
 
 function drawPostMink(canvas, colors) {
-    if (!colors) return;
+    if (!colors || !minkLayers || !canvas) return;
 
     const ctx = canvas.getContext("2d");
     const [ layer0, layer1, layer2, outline ] = minkLayers;

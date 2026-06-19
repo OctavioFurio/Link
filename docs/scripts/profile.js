@@ -2,22 +2,6 @@ const USER_ID     = localStorage.getItem('user_id');
 const BIO_MAX_LEN = 256;
 const palette = new Uint8Array(9); // 3 cores RGB
 
-// Mink Drawing
-function hex2rgb(hex) {
-    const n = parseInt(hex.slice(1), 16);
-    return [
-        (n>>16) &0xff, 
-        (n>>8)  &0xff, 
-        n       &0xff
-    ];
-}
-
-function rgb2hex(r, g, b) {
-    return "#" + [r,g,b]
-        .map(v => v.toString(16).padStart(2, "0"))
-        .join("");
-}
-
 function updatePalette(i, hex) {
     const [r, g, b] = hex2rgb(hex);
     palette[3*i]     = r;
@@ -25,55 +9,16 @@ function updatePalette(i, hex) {
     palette[3*i + 2] = b;
 }
 
-function P2rgb(i) {
-    return `rgb(${palette[i*3]},${palette[i*3+1]},${palette[i*3+2]})`;
-}
-
-function loadImage(src) {
-    return new Promise((res) => {
-        const img = new Image();
-        img.onload = () => res(img);
-        img.src = src;
-    });
-}
-
-const C   = document.getElementById('pfp-canvas');
-const ctx = C.getContext('2d');
+const C = document.getElementById('pfp-canvas');
 
 (async () => {
-    const [layer0, layer1, layer2, outline] = await Promise.all([
-        loadImage('pfp/secondFur.png'),
-        loadImage('pfp/mainFur.png'),
-        loadImage('pfp/bg&eyes.png'),
-        loadImage('pfp/outline.png'),
-    ]);
+    const layers = await loadMinkLayers();
 
     const previewC   = document.getElementById('pfp-preview');
     const previewCtx = previewC.getContext('2d');
 
-    function inPaint(img, color) {
-        const { width: w, height: h } = C;
-        const off = new OffscreenCanvas(w, h);
-        const oc  = off.getContext('2d');
-        oc.drawImage(img, 0, 0, w, h);
-        oc.globalCompositeOperation = 'source-atop';
-        oc.fillStyle = color;
-        oc.fillRect(0, 0, w, h);
-        ctx.drawImage(off, 0, 0);
-    }
-
     function render() {
-        const { width: w, height: h } = C;
-        ctx.clearRect(0, 0, w, h);
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(w/2, h/2, Math.min(w,h)/2, 0, Math.PI*2);
-        ctx.clip();
-        inPaint(layer0, P2rgb(0));
-        inPaint(layer1, P2rgb(1));
-        inPaint(layer2, P2rgb(2));
-        ctx.drawImage(outline, 0, 0, w, h);
-        ctx.restore();
+        renderMink(C, palette, layers, { circular: true });
 
         const pw = previewC.width, ph = previewC.height;
         previewCtx.clearRect(0, 0, pw, ph);
@@ -262,3 +207,7 @@ async function loadProfileStats() {
 }
 
 loadProfileStats();
+
+// Chat: a função já checa se a página tem a marcação do widget,
+// então é seguro chamar aqui mesmo que o profile.html ainda não a tenha.
+if (USER_ID) initChat(USER_ID);

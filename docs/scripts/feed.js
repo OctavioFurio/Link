@@ -19,6 +19,8 @@ if (IS_LOGGED) {
 	document.getElementById("search-btn").addEventListener("click", handleSearch);
 	document.getElementById("exit-btn").addEventListener("click", handleExit);
 	COMPOSE_TEXTAREA.addEventListener("input", handleInputCounter);
+
+    initChat(USER_ID);
 }
 else {
   	document.querySelector('.main-content').style.gridTemplateColumns = '1fr';
@@ -35,71 +37,13 @@ else {
 }
 loadAll();
 
-function loadImage(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-
-        img.src = src;
-    });
-}
-
+// Avatar Mink dos posts (camadas carregadas uma vez, desenho feito por mink.js)
 let minkLayers = null;
-
-async function loadMinkAssets() {
-    minkLayers = await Promise.all([
-        loadImage('pfp/secondFur.png'),
-        loadImage('pfp/mainFur.png'),
-        loadImage('pfp/bg&eyes.png'),
-        loadImage('pfp/outline.png'),
-    ]);
-}
-
-(async () => {
-    await loadMinkAssets();
-})();
+loadMinkLayers().then(layers => { minkLayers = layers; });
 
 function drawPostMink(canvas, colors) {
     if (!colors || !minkLayers || !canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    const [ layer0, layer1, layer2, outline ] = minkLayers;
-
-    const off = document.createElement("canvas");
-    off.width = canvas.width;
-    off.height = canvas.height;
-
-    const oc = off.getContext("2d");
-
-    function paint(img, rgb) {
-        const tmp = document.createElement("canvas");
-        tmp.width = off.width;
-        tmp.height = off.height;
-
-        const tc = tmp.getContext("2d");
-
-        tc.drawImage(img, 0, 0, tmp.width, tmp.height);
-
-        tc.globalCompositeOperation = "source-atop";
-
-        tc.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
-
-        tc.fillRect(0, 0, tmp.width, tmp.height);
-
-        oc.drawImage(tmp, 0, 0);
-    }
-
-    paint(layer0, colors.slice(0, 3));
-    paint(layer1, colors.slice(3, 6));
-    paint(layer2, colors.slice(6, 9));
-
-    oc.drawImage(outline, 0, 0, off.width, off.height);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.drawImage(off, 0, 0, canvas.width, canvas.height);
+    renderMink(canvas, colors, minkLayers);
 }
 
 function loadAll() {
@@ -251,20 +195,6 @@ function renderPost(post, username, liked=false) {
 		`;
 	}
     return card;
-}
-
-function timeAgo(isoString) {
-    const diff = Date.now() - new Date(isoString).getTime();
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours   = Math.floor(minutes / 60);
-    const days    = Math.floor(hours / 24);
-
-    if (seconds < 60)  return "agora mesmo";
-    if (minutes < 60)  return `${minutes}min atrás`;
-    if (hours < 24)    return `${hours}h atrás`;
-    if (days < 7)      return `${days}d atrás`;
-    return new Date(isoString).toLocaleDateString("pt-BR");
 }
 
 async function toggleLike(btn) {
@@ -431,218 +361,6 @@ function handleInputCounter() {
     else {
         charCount.style.color = "var(--muted-text-color)";
         charCount.style.fontWeight = "normal";
-    }
-}
-
-function handleExit() {
-	localStorage.removeItem("user_id");
-    localStorage.removeItem("username");	
-    window.location.href = `${DOMAIN}/login`;
-}
-
-if (IS_LOGGED) {
-    const widget       = document.getElementById("chat-widget");
-    const chatBox      = document.getElementById("chat-box");
-    const toggleBtn    = document.getElementById("chat-toggle-btn");
-    const messagesDiv  = document.getElementById("chat-messages");
-    const chatInput    = document.getElementById("chat-input");
-    const sendBtn      = document.getElementById("chat-send-btn");
-    const userList     = document.getElementById("chat-user-list");
-    const receiverName = document.getElementById("chat-receiver-name");
-
-    let chatPollInterval = null;
-    let currentReceiver  = null;
-    let currentReceiverName = null;
-
-    widget.style.display = "flex";
-
-    pollUnread();
-    const globalUnreadInterval = setInterval(pollUnread, 10000);
-
-    let unreadInterval = null;
-
-    toggleBtn.addEventListener("click", () => {
-        chatBox.classList.toggle("hidden");
-        if (!chatBox.classList.contains("hidden")) {
-            loadChatUsers().then(() => {
-                pollUnread();
-                unreadInterval = setInterval(pollUnread, 5000);
-            });
-        } else {
-            clearInterval(unreadInterval);
-        }
-    });
-
-    sendBtn.addEventListener("click", sendChatMessage);
-    chatInput.addEventListener("keydown", e => {
-        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-    });
-
-    async function loadChatUsers() {
-        userList.innerHTML = `<li style="color:var(--muted-text-color)">Carregando…</li>`;
-        try {
-            const [followingIds, conversationIds] = await Promise.all([
-                apiFetch(`/users/${USER_ID}/followings`),
-                apiFetch(`/chat/conversations/${USER_ID}`),
-            ]);
-
-            // Une os dois sem repetir
-            const allIds = [...new Set([...followingIds, ...conversationIds])];
-
-            userList.innerHTML = "";
-            if (!allIds.length) {
-                userList.innerHTML = `<li style="color:var(--muted-text-color)">Ninguém ainda.</li>`;
-                return;
-            }
-
-            await Promise.all(allIds.map(async uid => {
-                const userData = await apiFetch(`/users/${uid}`);
-                const li = document.createElement("li");
-                li.textContent = userData.username ?? uid;
-                li.dataset.id  = uid;
-                li.addEventListener("click", () => selectReceiver(uid, userData.username, li));
-                userList.appendChild(li);
-            }));
-
-            pollUnread();
-        } catch (e) {
-            console.error("Falha ao carregar usuários:", e);
-        }
-    }
-
-    function selectReceiver(uid, username, li) {
-        currentReceiver     = uid;
-        currentReceiverName = username;
-        receiverName.textContent = username;
-
-        userList.querySelectorAll("li").forEach(el => el.classList.remove("active"));
-        li.classList.add("active");
-
-        messagesDiv.innerHTML = "";
-        clearInterval(chatPollInterval);
-
-        loadMessages().then(() => {
-            // Marca como lido: salva a contagem atual
-            const msgs = messagesDiv.querySelectorAll(".chat-msg");
-            setSeenCount(uid, msgs.length);
-            updateBadge(li, uid, msgs.length);
-        });
-
-        chatPollInterval = setInterval(loadMessages, 3000);
-    }
-
-    async function loadMessages() {
-        if (!currentReceiver) return;
-        try {
-            const msgs = await apiFetch(`/chat/messages?user_a=${USER_ID}&user_b=${currentReceiver}`);
-            renderMessages(msgs);
-
-            // Conversa aberta = marcar como lido automaticamente
-            setSeenCount(currentReceiver, msgs.length);
-            const activeLi = userList.querySelector(`li[data-id="${currentReceiver}"]`);
-            if (activeLi) updateBadge(activeLi, currentReceiver, msgs.length);
-        } catch (e) {
-            console.error("Falha ao carregar mensagens:", e);
-        }
-    }
-
-    function renderMessages(msgs) {
-        const atBottom = messagesDiv.scrollHeight - messagesDiv.scrollTop <= messagesDiv.clientHeight + 40;
-        messagesDiv.innerHTML = "";
-
-        if (!msgs.length) {
-            messagesDiv.innerHTML = `<p style="color:var(--muted-text-color);font-size:var(--font-size-small);text-align:center;padding:.5rem">Nenhuma mensagem ainda.</p>`;
-            return;
-        }
-
-        msgs.forEach(msg => {
-            const mine = msg.sender_id === USER_ID;
-            const div  = document.createElement("div");
-            div.className = `chat-msg ${mine ? "mine" : "theirs"}`;
-            div.textContent = msg.content;
-            messagesDiv.appendChild(div);
-        });
-
-        if (atBottom) messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    async function sendChatMessage() {
-        const content = chatInput.value.trim();
-        if (!content || !currentReceiver) return;
-        chatInput.value = "";
-        try {
-            await apiFetch("/chat/message", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sender_id: USER_ID, receiver_id: currentReceiver, content }),
-            });
-            await loadMessages();
-        } catch (e) {
-            console.error("Falha ao enviar mensagem:", e);
-            toast("Falha ao enviar mensagem.");
-        }
-    }
-
-    // Guarda quantas mensagens cada conversa tinha na última vez que foi vista
-    function getSeenCount(uid) {
-        return parseInt(localStorage.getItem(`chat_seen_${uid}`) || "0");
-    }
-    function setSeenCount(uid, count) {
-        localStorage.setItem(`chat_seen_${uid}`, count);
-    }
-
-    // Atualiza o badge de uma li
-    function updateBadge(li, uid, totalCount) {
-        const seen    = getSeenCount(uid);
-        const unread  = totalCount - seen;
-        let badge = li.querySelector(".chat-badge");
-
-        if (unread > 0) {
-            if (!badge) {
-                badge = document.createElement("span");
-                badge.className = "chat-badge";
-                li.appendChild(badge);
-            }
-            badge.textContent = unread > 99 ? "99+" : unread;
-        } else {
-            badge?.remove();
-        }
-    }
-
-    const notifBadge = document.getElementById("chat-notif-badge");
-
-    async function pollUnread() {
-        // Busca IDs mesmo com o chat fechado
-        let monitoredIds = [];
-        try {
-            const [followingIds, conversationIds] = await Promise.all([
-                apiFetch(`/users/${USER_ID}/followings`),
-                apiFetch(`/chat/conversations/${USER_ID}`),
-            ]);
-            monitoredIds = [...new Set([...followingIds, ...conversationIds])];
-        } catch {
-            // Se falhar, usa o que já está na lista visual
-            monitoredIds = [...userList.querySelectorAll("li[data-id]")].map(li => li.dataset.id);
-        }
-
-        let totalUnread = 0;
-        await Promise.all(monitoredIds.map(async uid => {
-            try {
-                const msgs = await apiFetch(`/chat/messages?user_a=${USER_ID}&user_b=${uid}`);
-                totalUnread += Math.max(0, msgs.length - getSeenCount(uid));
-
-                // Atualiza badge na lista visual se o item já existir
-                const li = userList.querySelector(`li[data-id="${uid}"]`);
-                if (li) updateBadge(li, uid, msgs.length);
-            } catch {}
-        }));
-
-        if (totalUnread > 0) {
-            notifBadge.textContent = totalUnread > 99 ? "99+" : totalUnread;
-            notifBadge.style.display = "flex";
-        } else {
-            notifBadge.style.display = "none";
-        }
     }
 }
 

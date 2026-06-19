@@ -95,17 +95,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-.btn-ghost {
-    background: transparent;
-    color: var(--muted-text-color);
-    border: 1px solid var(--border-color);
-}
-.btn-ghost:hover {
-    color: var(--main-color);
-    border-color: var(--main-color);
-    background: transparent;
-}
-
 .btn-icon {
     display: flex;
     align-items: center;

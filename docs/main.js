@@ -31,6 +31,54 @@ else {
 }
 loadAll();
 
+const minkLayers = await Promise.all([
+    loadImage('pfp/secondFur.png'),
+    loadImage('pfp/mainFur.png'),
+    loadImage('pfp/bg&eyes.png'),
+    loadImage('pfp/outline.png'),
+]);
+
+function drawPostMink(canvas, colors) {
+    if (!colors) return;
+
+    const ctx = canvas.getContext("2d");
+    const [ layer0, layer1, layer2, outline ] = minkLayers;
+
+    const off = document.createElement("canvas");
+    off.width = canvas.width;
+    off.height = canvas.height;
+
+    const oc = off.getContext("2d");
+
+    function paint(img, rgb) {
+        const tmp = document.createElement("canvas");
+        tmp.width = off.width;
+        tmp.height = off.height;
+
+        const tc = tmp.getContext("2d");
+
+        tc.drawImage(img, 0, 0, tmp.width, tmp.height);
+
+        tc.globalCompositeOperation = "source-atop";
+
+        tc.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+
+        tc.fillRect(0, 0, tmp.width, tmp.height);
+
+        oc.drawImage(tmp, 0, 0);
+    }
+
+    paint(layer0, colors.slice(0, 3));
+    paint(layer1, colors.slice(3, 6));
+    paint(layer2, colors.slice(6, 9));
+
+    oc.drawImage(outline, 0, 0, off.width, off.height);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.drawImage(off, 0, 0, canvas.width, canvas.height);
+}
+
 function loadAll() {
     loadFeed();
     if (IS_LOGGED) loadSuggestions();
@@ -77,7 +125,19 @@ async function loadFeed() {
 
         posts.forEach(async (post, i) => {
             const userData = await apiFetch(`/users/${post.user_id}`);
-            updatePostUsername(postElements[i], userData.username);
+
+            updatePostUsername(
+                postElements[i],
+                userData.username
+            );
+
+            const colorsData =
+                await apiFetch(`/users/${post.user_id}/colors`);
+
+            drawPostMink(
+                postElements[i].querySelector(".post-mink"),
+                colorsData.mink_colors
+            );
         });
     } catch (error) {
         console.error("Fail to load feed:", error);
@@ -97,7 +157,11 @@ function renderPost(post, username, liked=false) {
     card.className = "post-card";
 	if(IS_LOGGED) {
         card.innerHTML = `
-            <div class="post-meta"><span class="post-name">${username}</span> | ${timeAgo(post.created_at)}</div>
+            <div class="post-meta">
+                <canvas class="post-mink" width="36" height="36"></canvas>
+                <span class="post-name">${username}</span>
+                <br> ${timeAgo(post.created_at)}
+            </div>
             <div class="post-content">${escHtml(post.content)}</div>
             <div class="post-actions">
                 <button class="like-btn${liked ? " liked" : ""}" 

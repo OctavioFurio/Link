@@ -2,36 +2,30 @@ function initChat(userId) {
     const widget = document.getElementById("chat-widget");
     if (!widget) return;
 
-    const chatBox       = document.getElementById("chat-box");
-    const toggleBtn     = document.getElementById("chat-toggle-btn");
-    const messagesDiv   = document.getElementById("chat-messages");
-    const chatInput     = document.getElementById("chat-input");
-    const sendBtn       = document.getElementById("chat-send-btn");
-    const userList      = document.getElementById("chat-user-list");
-    const receiverName  = document.getElementById("chat-receiver-name");
-    const notifBadge    = document.getElementById("chat-notif-badge");
+    const chatBox      = document.getElementById("chat-box");
+    const toggleBtn    = document.getElementById("chat-toggle-btn");
+    const messagesDiv  = document.getElementById("chat-messages");
+    const chatInput    = document.getElementById("chat-input");
+    const sendBtn      = document.getElementById("chat-send-btn");
+    const userList     = document.getElementById("chat-user-list");
+    const receiverName = document.getElementById("chat-receiver-name");
+    const refreshBtn   = document.getElementById("chat-refresh-btn");
 
     let chatPollInterval = null;
     let currentReceiver  = null;
-    let currentReceiverName = null;
-    let unreadInterval = null;
 
     widget.style.display = "flex";
-
-    pollUnread();
-    setInterval(pollUnread, 10000);
 
     toggleBtn.addEventListener("click", () => {
         chatBox.classList.toggle("hidden");
         if (!chatBox.classList.contains("hidden")) {
-            loadChatUsers().then(() => {
-                pollUnread();
-                unreadInterval = setInterval(pollUnread, 5000);
-            });
+            loadChatUsers();
         } else {
-            clearInterval(unreadInterval);
+            clearInterval(chatPollInterval);
         }
     });
+
+    refreshBtn.addEventListener("click", () => loadChatUsers());
 
     sendBtn.addEventListener("click", sendChatMessage);
     chatInput.addEventListener("keydown", e => {
@@ -62,16 +56,13 @@ function initChat(userId) {
                 li.addEventListener("click", () => selectReceiver(uid, userData.username, li));
                 userList.appendChild(li);
             }));
-
-            pollUnread();
         } catch (e) {
             console.error("Falha ao carregar usuários:", e);
         }
     }
 
     function selectReceiver(uid, username, li) {
-        currentReceiver     = uid;
-        currentReceiverName = username;
+        currentReceiver = uid;
         receiverName.textContent = username;
 
         userList.querySelectorAll("li").forEach(el => el.classList.remove("active"));
@@ -80,13 +71,8 @@ function initChat(userId) {
         messagesDiv.innerHTML = "";
         clearInterval(chatPollInterval);
 
-        loadMessages().then(() => {
-            const msgs = messagesDiv.querySelectorAll(".chat-msg");
-            setSeenCount(uid, msgs.length);
-            updateBadge(li, uid, msgs.length);
-        });
-
-        chatPollInterval = setInterval(loadMessages, 3000);
+        loadMessages();
+        chatPollInterval = setInterval(loadMessages, 10000);
     }
 
     async function loadMessages() {
@@ -94,10 +80,6 @@ function initChat(userId) {
         try {
             const msgs = await apiFetch(`/chat/messages?user_a=${userId}&user_b=${currentReceiver}`);
             renderMessages(msgs);
-
-            setSeenCount(currentReceiver, msgs.length);
-            const activeLi = userList.querySelector(`li[data-id="${currentReceiver}"]`);
-            if (activeLi) updateBadge(activeLi, currentReceiver, msgs.length);
         } catch (e) {
             console.error("Falha ao carregar mensagens:", e);
         }
@@ -137,61 +119,6 @@ function initChat(userId) {
         } catch (e) {
             console.error("Falha ao enviar mensagem:", e);
             toast("Falha ao enviar mensagem.");
-        }
-    }
-
-    function getSeenCount(uid) {
-        return parseInt(localStorage.getItem(`chat_seen_${uid}`) || "0");
-    }
-    function setSeenCount(uid, count) {
-        localStorage.setItem(`chat_seen_${uid}`, count);
-    }
-
-    function updateBadge(li, uid, totalCount) {
-        const seen    = getSeenCount(uid);
-        const unread  = totalCount - seen;
-        let badge = li.querySelector(".chat-badge");
-
-        if (unread > 0) {
-            if (!badge) {
-                badge = document.createElement("span");
-                badge.className = "chat-badge";
-                li.appendChild(badge);
-            }
-            badge.textContent = unread > 99 ? "99+" : unread;
-        } else {
-            badge?.remove();
-        }
-    }
-
-    async function pollUnread() {
-        let monitoredIds = [];
-        try {
-            const [followingIds, conversationIds] = await Promise.all([
-                apiFetch(`/users/${userId}/followings`),
-                apiFetch(`/chat/conversations/${userId}`),
-            ]);
-            monitoredIds = [...new Set([...followingIds, ...conversationIds])];
-        } catch {
-            monitoredIds = [...userList.querySelectorAll("li[data-id]")].map(li => li.dataset.id);
-        }
-
-        let totalUnread = 0;
-        await Promise.all(monitoredIds.map(async uid => {
-            try {
-                const msgs = await apiFetch(`/chat/messages?user_a=${userId}&user_b=${uid}`);
-                totalUnread += Math.max(0, msgs.length - getSeenCount(uid));
-
-                const li = userList.querySelector(`li[data-id="${uid}"]`);
-                if (li) updateBadge(li, uid, msgs.length);
-            } catch {}
-        }));
-
-        if (totalUnread > 0) {
-            notifBadge.textContent = totalUnread > 99 ? "99+" : totalUnread;
-            notifBadge.style.display = "flex";
-        } else {
-            notifBadge.style.display = "none";
         }
     }
 }

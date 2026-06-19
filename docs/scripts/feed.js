@@ -40,7 +40,6 @@ function loadNotLogged() {
   	document.querySelector('.sidebar').style.display = 'none';
   	document.querySelector('#search-input').style.display = 'none';
   	document.querySelector('#search-btn').style.display = 'none';
-	document.querySelector('#exit-btn').style.display = 'none';
 	
 	const compose = document.querySelector('.compose');
 	compose.classList.remove('compose');

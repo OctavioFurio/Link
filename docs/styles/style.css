@@ -70,7 +70,7 @@ input:user-invalid {
     border-color: var(--danger-color);
 }
 
-button {
+button, #profile-btn{
     padding: 0.45rem 1rem;
     cursor: pointer;
     font-weight: bold;
@@ -82,8 +82,9 @@ button {
     border: 1px solid var(--main-color);
     transition: background 0.2s, color 0.2s, border-color 0.2s;
     white-space: nowrap;
+    text-decoration: none;
 }
-button:hover {
+button:hover, #profile-btn:hover {
     background: transparent;
     color: var(--main-color);
 }
@@ -202,25 +203,6 @@ header nav {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-a#profile-btn {
-    padding: 0.45rem 1rem;
-    cursor: pointer;
-    font-weight: bold;
-    font-family: var(--font);
-    font-size: var(--font-size-medium);
-    color: var(--foreground-color);
-    background: var(--main-color);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--main-color);
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s;
-    white-space: nowrap;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
 }
 
 .main-content {
@@ -574,6 +556,11 @@ a#profile-btn {
 @media (max-width: 640px) {
     #chat-box { width: calc(100vw - 3rem); }
     #chat-sidebar { width: 100px; }
+
+    .profile-top {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 }
 
 
@@ -642,6 +629,8 @@ a#profile-btn {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    width: 100%;
+    word-break: break-word;
 }
 
 .profile-card .bio-view {

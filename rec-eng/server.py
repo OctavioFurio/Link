@@ -9,12 +9,13 @@ Ao inicializar:
 
 Variáveis do ambiente
 ---------------------
-PORT                Porta do gRPC               (default: 50051)
-REFIT_INTERVAL      Segundos entre re-treinos   (default: 3600 (1 hora))
-REC_TIMEOUT_SEC     Timeout gRPC                (default: 2.0)
+PORT                     Porta do gRPC                       (default: 50051)
+REFIT_INTERVAL           Segundos entre re-treinos           (default: 3600 (1 hora))
+FIREBASE_SERVICE_ACCOUNT JSON do Service Account do Firebase (obrigatório)
 """
 
 import os
+import json
 import time
 import logging
 import threading
@@ -35,7 +36,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore as fs
 
 if not firebase_admin._apps:
-    firebase_admin.initialize_app(credentials.ApplicationDefault())
+    _sa = json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT"])
+    firebase_admin.initialize_app(credentials.Certificate(_sa))
 
 DB = fs.client()
 

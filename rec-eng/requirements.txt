@@ -1,4 +1,6 @@
 grpcio
 grpcio-tools
-torch
 protobuf
+firebase-admin
+numpy
+scikit-learn

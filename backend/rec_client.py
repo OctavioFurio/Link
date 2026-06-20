@@ -1,24 +1,31 @@
-import grpc, os
-import rec_pb2, rec_pb2_grpc
+"""
+Client para a engine de recomendação.
 
-_channel = None
+Autores:
+    Octávio X. Fúrio
+"""
 
+import os
+import grpc
+import rec_pb2
+import rec_pb2_grpc
 
-def _get_stub():
-    global _channel
-    if _channel is None:
-        host = os.getenv("REC_ENGINE_HOST", "localhost:50051")
-        _channel = grpc.insecure_channel(host)
-    return rec_pb2_grpc.RecommenderStub(_channel)
+_CHANNEL = grpc.insecure_channel(os.getenv("REC_ENGINE_ADDR", "localhost:50051"))
+_STUB    = rec_pb2_grpc.RecommenderStub(_CHANNEL)
+_TIMEOUT = float(os.getenv("REC_TIMEOUT_SEC", "2.0"))
 
 
 def get_feed(user_id: str, top_k: int = 10) -> list[str]:
-    stub = _get_stub()
-    resp = stub.GetContentFeed(rec_pb2.FeedRequest(user_id=user_id, top_k=top_k))
+    resp = _STUB.GetContentFeed(
+        rec_pb2.FeedRequest(user_id=user_id, top_k=top_k),
+        timeout=_TIMEOUT,
+    )
     return list(resp.post_ids)
 
 
 def get_user_suggestions(user_id: str, top_k: int = 5) -> list[str]:
-    stub = _get_stub()
-    resp = stub.GetUserSuggestions(rec_pb2.UserRequest(user_id=user_id, top_k=top_k))
+    resp = _STUB.GetUserSuggestions(
+        rec_pb2.UserRequest(user_id=user_id, top_k=top_k),
+        timeout=_TIMEOUT,
+    )
     return list(resp.user_ids)

@@ -77,7 +77,12 @@ def send_message(body: MessageIn):
 
 
 @router.get("/messages")
-def get_messages(user_a: str, user_b: str, limit: int = Query(default=30, le=100)):
+def get_messages(
+    user_a: str,
+    user_b: str,
+    limit: int = Query(default=30, le=100),
+    after: str | None = Query(default=None),
+):
     """
     Retorna as mensagens trocadas entre dois usuários.
 
@@ -95,18 +100,25 @@ def get_messages(user_a: str, user_b: str, limit: int = Query(default=30, le=100
             Quantidade máxima de mensagens retornadas
             (máximo de 100).
 
+        after:
+            ID da última mensagem já conhecida pelo cliente.
+            Quando informado, retorna apenas as mensagens
+            posteriores a ela, reduzindo o tráfego no refresh.
+
     Returns:
         list:
             Lista de mensagens ordenadas pela data de envio.
     """
 
-    docs = (
-        col("chats").document(chat_id(user_a, user_b))
-        .collection("messages")
-        .order_by("created_at", direction="DESCENDING")
-        .limit(limit)
-        .stream()
-    )
+    conv_ref = col("chats").document(chat_id(user_a, user_b))
+    query = conv_ref.collection("messages").order_by("created_at", direction="DESCENDING")
+
+    if after:
+        snapshot = conv_ref.collection("messages").document(after).get()
+        if snapshot.exists:
+            query = query.end_before(snapshot)
+
+    docs = query.limit(limit).stream()
     return list(reversed([{"message_id": d.id} | (d.to_dict() or {}) for d in docs]))
 
 

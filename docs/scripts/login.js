@@ -18,11 +18,10 @@ const TEXTS = {
     fill: "Preencha todos os campos.",
 };
 
-document.querySelector(".login-form").addEventListener("submit", handleSubmit);
+document.getElementById("signin-btn").addEventListener("click", () => handleSubmit("signin"));
+document.getElementById("signup-btn").addEventListener("click", () => handleSubmit("signup"));
 
-async function handleSubmit(e) {
-    e.preventDefault();
-
+async function handleSubmit(action) {
     const username = document.getElementById("username-input").value.trim();
     const password = document.getElementById("password-input").value;
 
@@ -30,8 +29,6 @@ async function handleSubmit(e) {
         toast(TEXTS.fill);
         return;
     }
-
-    const action = e.submitter?.id === "signup-btn" ? "signup" : "signin";
 
     const actionTexts = TEXTS[action];
     const isSignin = action === "signin";

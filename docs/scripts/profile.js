@@ -177,10 +177,12 @@ async function loadProfileStats() {
     if (!USER_ID) return;
 
     try {
-        const followers = await apiFetch(`/users/${USER_ID}/followers`);
-        const followings = await apiFetch(`/users/${USER_ID}/followings`);
-        const likes = await apiFetch(`/users/${USER_ID}/likes_received`);
-        const posts = await apiFetch(`/posts/user/${USER_ID}`);
+        const [followers, followings, likes, posts] = await Promise.all([
+            apiFetch(`/users/${USER_ID}/followers`),
+            apiFetch(`/users/${USER_ID}/followings`),
+            apiFetch(`/users/${USER_ID}/likes_received`),
+            apiFetch(`/posts/user/${USER_ID}`),
+        ]);
 
         document.getElementById('followers-count').textContent =
             followers.length;

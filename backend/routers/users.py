@@ -75,6 +75,30 @@ def search_users(query: str, top_k: int = Query(default=5, ge=1, le=50)):
     return [user_dict(d) for d in docs]
 
 
+@router.get("/{user_id}/profile")
+def get_user_profile(user_id: str):
+    """
+    Retorna dados públicos e cores do Mink de um usuário.
+
+    Combina as informações de perfil e paleta de cores em
+    uma única requisição, evitando chamadas separadas no feed.
+
+    Args:
+        user_id:
+            Identificador do usuário.
+
+    Returns:
+        dict:
+            Username e cores do Mink do usuário.
+    """
+    data = (get_doc("users", user_id).to_dict() or {})
+    return {
+        "user_id":     user_id,
+        "username":    data.get("username"),
+        "mink_colors": data.get("mink_colors"),
+    }
+
+
 @router.get("/{user_id}")
 def get_user(user_id: str):
     """

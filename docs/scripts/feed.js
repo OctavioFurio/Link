@@ -122,20 +122,16 @@ async function loadFeed(reset = false) {
 
         posts.forEach(async (post, i) => {
             try {
-                const userData =
-                    await apiFetch(`/users/${post.user_id}`);
+                const profile = await apiFetch(`/users/${post.user_id}/profile`);
 
                 updatePostUsername(
                     postElements[i],
-                    userData.username
+                    profile.username
                 );
-
-                const colorsData =
-                    await apiFetch(`/users/${post.user_id}/colors`);
 
                 drawPostMink(
                     postElements[i].querySelector(".post-mink"),
-                    colorsData.mink_colors
+                    profile.mink_colors
                 );
             } catch {}
         });

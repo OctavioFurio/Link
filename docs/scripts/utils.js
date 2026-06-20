@@ -3,7 +3,10 @@ const DOMAIN = "https://octaviofurio.github.io/Link"
 const TOAST_TIMER_MS = 2000;
 
 function apiFetch(path, options) {
-    return fetch(`${API}${path}`, options).then(r => r.json());
+    return fetch(`${API}${path}`, options).then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+    });
 }
 
 function escHtml(s) {

@@ -6,7 +6,6 @@
  * @authors Murilo M. Grosso, Octávio X. Fúrio
  */
 
-
 const TOP_K_FEED = 10;
 const TOP_K_SEARCH = 5;
 const MAX_POST_LEN = 256;
@@ -117,7 +116,7 @@ function updateProfBtn() {
  * @returns {Promise<void>}
  */
 async function loadFeed(reset = false) {
-    if (feedLoading || feedEnded)
+    if (feedLoading || (feedEnded && !reset))
         return;
 
     feedLoading = true;

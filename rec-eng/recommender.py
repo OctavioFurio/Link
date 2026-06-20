@@ -36,44 +36,6 @@ def clean_text(text: str) -> str:
     text = text.replace("\n", " ").replace("\r", " ")
     return _MULTI_SP.sub(" ", text).strip().strip("\"'")
 
-
-def is_quality(text: str) -> bool:
-    if len(text) < 15:
-        return False
-    
-    alpha = sum(c.isalpha() for c in text)
-
-    # TODO: posts com muitos emojis são relevantes?
-    if alpha / len(text) < 0.40:
-        return False
-    
-    words = set(text.lower().split())
-    return bool(words & PTBR_STOP)
-
-
-def load_posts(paths: list[str]) -> list[str]:
-    posts = []
-    for path in paths:
-        try:
-            with open(path, "rb") as f:
-                bom = f.read(2)
-            enc = "utf-16" if bom in (b"\xff\xfe", b"\xfe\xff") else "utf-8"
-            needs_clean = any(k in path.lower() for k in ("tweet", "scraped", "scrap"))
-            with open(path, "r", encoding=enc, errors="ignore") as f:
-                raw_lines = [l.strip() for l in f if l.strip()]
-            kept = 0
-            for line in raw_lines:
-                text = clean_text(line) if needs_clean else line.strip()
-                if needs_clean and not is_quality(text):
-                    continue
-                posts.append(text)
-                kept += 1
-            print(f"  {path}: {enc}, {len(raw_lines)} raw -> {kept} kept")
-        except FileNotFoundError:
-            print(f"  (skipping missing: {path})")
-    return posts
-
-
 def dedup(posts: list[str]) -> list[str]:
     seen, out = set(), []
     for p in posts:

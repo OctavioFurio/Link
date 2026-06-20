@@ -1,3 +1,20 @@
+"""
+Serviço de bate-papo da aplicação Link.
+
+Este módulo disponibiliza os endpoints responsáveis pelo
+envio e recebimento de mensagens entre usuários.
+
+Endpoints:
+    POST /chat/message
+    GET /chat/messages
+    GET /chat/conversations/{user_id}
+
+Autores:
+    Murilo M. Grosso
+    Octávio X. Fúrio
+"""
+
+
 import uuid
 
 from fastapi import APIRouter, HTTPException, Query
@@ -8,10 +25,35 @@ from schemas import MessageIn
 from services.database import col, chat_id
 
 router = APIRouter(prefix="/chat")
+"""
+Rotas relacionadas ao sistema de mensagens privadas.
+
+Prefixo:
+    /chat
+"""
 
 
 @router.post("/message")
 def send_message(body: MessageIn):
+    """
+    Envia uma mensagem particular para outro usuário.
+
+    Caso ainda não exista uma conversa entre os dois
+    participantes, ela é criada automaticamente.
+
+    Args:
+        body (MessageIn): 
+            Corpo da mensagem.
+
+    Returns:
+        dict:
+            Identificador da mensagem criada.
+
+    Raises:
+        HTTPException(400):
+            Mensagem vazia ou maior que o tamanho limite.
+    """
+
     content = body.content.strip()
     if not content or len(content) > MAX_LEN:
         raise HTTPException(400, "Invalid message")
@@ -36,6 +78,28 @@ def send_message(body: MessageIn):
 
 @router.get("/messages")
 def get_messages(user_a: str, user_b: str, limit: int = Query(default=30, le=100)):
+    """
+    Retorna as mensagens trocadas entre dois usuários.
+
+    As mensagens são retornadas em ordem cronológica,
+    limitadas pela quantidade especificada.
+
+    Args:
+        user_a: 
+            ID do usuário A.
+
+        user_b: 
+            ID do usuário B.
+            
+        limit: 
+            Quantidade máxima de mensagens retornadas
+            (máximo de 100).
+
+    Returns:
+        list:
+            Lista de mensagens ordenadas pela data de envio.
+    """
+
     docs = (
         col("chats").document(chat_id(user_a, user_b))
         .collection("messages")
@@ -48,6 +112,18 @@ def get_messages(user_a: str, user_b: str, limit: int = Query(default=30, le=100
 
 @router.get("/conversations/{user_id}")
 def get_conversations(user_id: str):
+    """
+    Busca por todas as conversas ativas de um usuário.
+
+    Args:
+        user_id: 
+            ID do usuário.
+
+    Returns:
+        list:
+            Lista contendo os IDs dos usuários com os
+            quais o usuário já trocou mensagens.
+    """
     docs = col("chats").where("participants", "array_contains", user_id).stream()
     return [
         other

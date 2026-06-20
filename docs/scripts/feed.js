@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Funcionalidades do feed principal da aplicação Link.
+ *
+ * Carrega o feed e as sugestões, e permite a criação e interação entre posts de usuários.
+ *
+ * @authors Murilo M. Grosso, Octávio X. Fúrio
+ */
+
+
 const TOP_K_FEED = 10;
 const TOP_K_SEARCH = 5;
 const MAX_POST_LEN = 256;
@@ -24,6 +33,13 @@ window.addEventListener("scroll", () => {
         loadFeed();
 });
 
+/**
+ * Versão da página principal se estiver logado.
+ *
+ * Inicializa botões, chat privado e sugestões.
+ * 
+ * @returns {void}
+ */
 function loadLogged() {
     updateProfBtn();
 
@@ -35,6 +51,13 @@ function loadLogged() {
     loadSuggestions();
 }
 
+/**
+ * Versão da página principal se não estiver logado.
+ *
+ * Remove conteúdos do site.
+ * 
+ * @returns {void}
+ */
 function loadNotLogged() {
   	document.querySelector('.main-content').style.gridTemplateColumns = '1fr';
   	document.querySelector('.sidebar').style.display = 'none';
@@ -47,11 +70,29 @@ function loadNotLogged() {
 	compose.innerHTML = "Faça login para criar, interagir e conectar!";
 }
 
+
+/**
+ * Renderiza o Mink de um post em um canvas.
+ *
+ * Ignora se as camadas ou cores ainda não estiverem carregadas.
+ *
+ * @param {HTMLCanvasElement} canvas - Canvas alvo da renderização.
+ * @param {number[]} colors - Vetor de 9 valores RGB representando as cores do Mink.
+ * @returns {void}
+ */
 function drawPostMink(canvas, colors) {
     if (!colors || !minkLayers || !canvas) return;
     renderMink(canvas, colors, minkLayers);
 }
 
+/**
+ * Atualiza o botão de perfil.
+ *
+ * Se estiver logado, muda o texto do botão de perfil para o nome do usuário.
+ * Também exibe o nome do usuário na caixa para escrever posts.
+ * 
+ * @returns {void}
+ */
 function updateProfBtn() {
     const profileBtn = document.getElementById("profile-btn");
     const textBox = document.getElementById("compose-author");
@@ -64,6 +105,17 @@ function updateProfBtn() {
     }
 }
 
+/**
+ * Carrega e exibe posts do feed recomendado.
+ *
+ * Suporta paginação via scroll infinito. Quando `reset` é `true`,
+ * reinicia o offset e limpa o container antes de renderizar.
+ * Busca o perfil de cada autor em paralelo para atualizar nome e Mink.
+ *
+ * @async
+ * @param {boolean} [reset=false] - Se `true`, reinicia o feed do início.
+ * @returns {Promise<void>}
+ */
 async function loadFeed(reset = false) {
     if (feedLoading || feedEnded)
         return;
@@ -154,6 +206,13 @@ async function loadFeed(reset = false) {
     }
 }
 
+/**
+ * Exibe uma mensagem centralizada no container do feed.
+ *
+ * @param {HTMLElement} container - Elemento onde a mensagem será exibida.
+ * @param {string} message - Texto a ser exibido.
+ * @returns {void}
+ */
 function setFeedMessage(container, message) {
   container.innerHTML = `
     <p style='color:var(--muted-text-color);padding:1rem'>
@@ -161,6 +220,18 @@ function setFeedMessage(container, message) {
     </p>`;
 }
 
+
+/**
+ * Cria e retorna o elemento HTML de um post.
+ *
+ * Inclui o canvas do Mink, autor, tempo relativo, conteúdo
+ * e botão de curtida (apenas para usuários autenticados).
+ *
+ * @param {Object} post - Dados do post retornados pela API.
+ * @param {string} username - Nome em cache de usuário a exibir.
+ * @param {boolean} [liked=false] - Se o usuário autenticado já curtiu o post.
+ * @returns {HTMLElement} Elemento `<article>` do post pronto para inserção no DOM.
+ */
 function renderPost(post, username, liked=false) {
     const card = document.createElement("article");
     card.className = "post-card";
@@ -191,6 +262,15 @@ function renderPost(post, username, liked=false) {
     return card;
 }
 
+/**
+ * Alterna a curtida de um post.
+ *
+ * Atualiza a UI otimisticamente e reverte em caso de erro na API.
+ *
+ * @async
+ * @param {HTMLButtonElement} btn - Botão de curtida que disparou o evento.
+ * @returns {Promise<void>}
+ */
 async function toggleLike(btn) {
     const postId = btn.dataset.id;
     const wasLiked = btn.classList.contains("liked");
@@ -222,10 +302,27 @@ async function toggleLike(btn) {
     }
 }
 
+/**
+ * Atualiza o nome do autor exibido em um post.
+ *
+ * Usado para substituir o username temporário pelo dado oficial da API.
+ *
+ * @param {HTMLElement} postElement - Elemento do post no DOM.
+ * @param {string} username - Username definitivo a exibir.
+ * @returns {void}
+ */
 function updatePostUsername(postElement, username) {
     postElement.querySelector(".post-author").textContent = username;
 }
 
+/**
+ * Carrega e exibe sugestões de usuários para seguir.
+ *
+ * Busca recomendações da engine e marca os que o usuário já segue.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 async function loadSuggestions() {
     const list = document.getElementById("suggestions-list");
     setListMessage(list, "Carregando...");
@@ -248,10 +345,26 @@ async function loadSuggestions() {
     }
 }
 
+/**
+ * Exibe uma mensagem de estado dentro de uma lista.
+ *
+ * @param {HTMLUListElement} list - Elemento `<ul>` alvo.
+ * @param {string} message - Texto a ser exibido como item da lista.
+ * @returns {void}
+ */
 function setListMessage(list, message) {
     list.innerHTML = `<li style='color:var(--muted-text-color)'>${message}</li>`;
 }
 
+/**
+ * Cria e retorna o elemento `<li>` de um usuário sugerido.
+ *
+ * Inclui o nome do usuário e um botão para seguir/deixar de seguir.
+ *
+ * @param {Object} user - Dados do usuário retornados pela API.
+ * @param {boolean} [following=false] - Se o usuário autenticado já segue este usuário.
+ * @returns {HTMLLIElement} Elemento `<li>` pronto para inserção no DOM.
+ */
 function renderUserLi(user, following=false) {
     const li = document.createElement("li");
     li.innerHTML = `
@@ -265,6 +378,15 @@ function renderUserLi(user, following=false) {
     return li;
 }
 
+/**
+ * Alterna o estado de seguir/deixar de seguir um usuário.
+ *
+ * Atualiza a UI otimisticamente e reverte em caso de erro na API.
+ *
+ * @async
+ * @param {HTMLButtonElement} btn - Botão de seguir que disparou o evento.
+ * @returns {Promise<void>}
+ */
 async function toggleFollow(btn) {
     const userId = btn.dataset.id;
     const isFollowing = btn.classList.contains("following");
@@ -292,6 +414,14 @@ async function toggleFollow(btn) {
     }
 }
 
+/**
+ * Processa o envio de uma nova publicação.
+ *
+ * Lê o conteúdo do textarea, envia para a API e recarrega o feed em caso de sucesso.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 async function handleNewPost() {
     const input = document.getElementById("post-input");
     const content = input.value.trim();
@@ -312,7 +442,15 @@ async function handleNewPost() {
         toast("Falha ao publicar, tente novamente.");
     }
 }
- 
+
+/**
+ * Processa a busca de usuários pelo campo de pesquisa.
+ *
+ * Exibe os resultados no painel de sugestões com o estado de seguir atualizado.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 async function handleSearch() {
     const query = document.getElementById("search-input").value.trim();
     if (!query) return;
@@ -343,6 +481,13 @@ async function handleSearch() {
     }
 }
 
+/**
+ * Atualiza o contador de caracteres do textarea de composição.
+ *
+ * Destaca o contador em vermelho ao atingir o limite máximo.
+ *
+ * @returns {void}
+ */
 function handleInputCounter() {
     const currentLength = COMPOSE_TEXTAREA.value.length;
     const charCount = document.getElementById("compose-count");

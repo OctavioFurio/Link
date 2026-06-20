@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Serviço de autenticação da aplicação Link.
+ *
+ * Gerencia o login e cadastro de usuários.
+ *
+ * @authors Murilo M. Grosso
+ */
+
 const LOGIN_TIMER_MS = 800;
 
 const TEXTS = {
@@ -21,6 +29,17 @@ const TEXTS = {
 document.getElementById("signin-btn").addEventListener("click", () => handleSubmit("signin"));
 document.getElementById("signup-btn").addEventListener("click", () => handleSubmit("signup"));
 
+/**
+ * Processa o envio do formulário de autenticação.
+ *
+ * Lê as credenciais do formulário, desabilita o botão
+ * correspondente durante a requisição e redireciona
+ * para a página principal em caso de sucesso.
+ *
+ * @async
+ * @param {"signin" | "signup"} action - Ação a ser executada.
+ * @returns {Promise<void>}
+ */
 async function handleSubmit(action) {
     const username = document.getElementById("username-input").value.trim();
     const password = document.getElementById("password-input").value;

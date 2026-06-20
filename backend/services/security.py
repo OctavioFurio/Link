@@ -11,7 +11,6 @@ Funcionalidades:
 
 Autores:
     Murilo M. Grosso
-    Octávio X. Fúrio
 """
 
 import hashlib

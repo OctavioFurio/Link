@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Funções para renderização do Mink.
+ *
+ * @authors Octávio X. Fúrio
+ */
+
 const MINK_LAYER_SRCS = [
     'images/pfp/secondFur.png',
     'images/pfp/mainFur.png',

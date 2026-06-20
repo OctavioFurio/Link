@@ -1,7 +1,24 @@
-const USER_ID     = localStorage.getItem('user_id');
+/**
+ * @fileoverview Lógica da página de perfil da aplicação Link.
+ *
+ * Gerencia a personalização e o salvamento do Mink, a edição
+ * da bio, inspeção de perfil, as estatísticas do usuário
+ * (seguidores, seguindo, curtidas e postagens) e os controles de saída.
+ *
+ * @authors Octávio X. Fúrio
+ */
+
 const BIO_MAX_LEN = 256;
 const palette = new Uint8Array(9);
+const USER_ID = localStorage.getItem('user_id');
 
+/**
+ * Atualiza a paleta de cores do Mink em uma camada específica.
+ *
+ * @param {number} i - Índice da camada (0, 1 ou 2).
+ * @param {string} hex - Cor em formato hexadecimal a ser aplicada na camada.
+ * @returns {void}
+ */
 function updatePalette(i, hex) {
     const [r, g, b] = hex2rgb(hex);
     palette[3*i]     = r;
@@ -11,6 +28,14 @@ function updatePalette(i, hex) {
 
 const C = document.getElementById('pfp-canvas');
 
+/**
+ * Inicializa o editor de Mink: carrega as camadas de imagem, configura
+ * os seletores de cor, os botões de salvar (arquivo e servidor) e
+ * carrega as cores salvas do usuário, se houver.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 (async () => {
     const layers = await loadMinkLayers();
 
@@ -100,6 +125,11 @@ const inspector = document.getElementById('inspector-modal');
 const backdrop  = document.getElementById('inspector-backdrop');
 const closeBtn  = document.getElementById('inspector-close');
 
+/**
+ * Abre o modal de inspeção/edição de perfil.
+ *
+ * @returns {void}
+ */
 function openInspector() {
     inspector.style.removeProperty('display');
     backdrop.style.removeProperty('display');
@@ -111,6 +141,11 @@ function openInspector() {
     closeBtn.focus();
 }
 
+/**
+ * Fecha o modal de inspeção/edição de perfil.
+ *
+ * @returns {void}
+ */
 function closeInspector() {
     inspector.classList.add('is-hidden');
     backdrop.classList.add('is-hidden');
@@ -126,8 +161,6 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !inspector.classList.contains('is-hidden')) closeInspector();
 });
 
-
-// Bio
 const profileName = document.getElementById('profile-name');
 const bioView     = document.querySelector('.bio-view');
 const bioText     = document.getElementById('bio-text');
@@ -144,6 +177,12 @@ editBioBtn.addEventListener('click', () => {
     bioSection.classList.remove('is-hidden');
 });
 
+/**
+ * Atualiza o contador de caracteres exibido conforme o usuário
+ * digita na caixa de edição da bio.
+ *
+ * @returns {void}
+ */
 function updateBioCount() {
     bioCount.textContent = `${bioInput.value.length}/${BIO_MAX_LEN}`;
 }
@@ -173,6 +212,13 @@ saveBioBtn.addEventListener('click', () => {
     });
 });
 
+/**
+ * Carrega e exibe as estatísticas do perfil do usuário: número de
+ * seguidores, seguindo, curtidas recebidas e a lista de postagens.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 async function loadProfileStats() {
     if (!USER_ID) return;
 

@@ -11,7 +11,6 @@ Endpoints:
 
 Autores:
     Murilo M. Grosso
-    Octávio X. Fúrio
 """
 
 

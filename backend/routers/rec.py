@@ -10,7 +10,6 @@ Endpoints:
     GET /rec/users/{user_id}
 
 Autores:
-    Murilo M. Grosso
     Octávio X. Fúrio
 """
 

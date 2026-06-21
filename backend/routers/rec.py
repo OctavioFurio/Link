@@ -26,8 +26,7 @@ Prefixo:
     /rec
 """
 
-# Quantos posts próprios recentes injetar no topo do feed (apenas na primeira página).
-_OWN_POST_PINNED = 3
+_OWN_POST_PINNED = 1
 
 
 @router.get("/feed/{user_id}")
@@ -59,9 +58,6 @@ def rec_feed(user_id: str, top_k: int = Query(default=10, ge=1, le=100), offset:
         list:
             Lista de publicações recomendadas.
     """
-    # Posts recentes do próprio usuário — injetados apenas na primeira página,
-    # para que um post recém-criado apareça imediatamente no topo do feed
-    # sem depender do próximo re-treino da engine de recomendação.
     pinned_ids: list[str] = []
     if offset == 0:
         pinned_ids = [
@@ -87,8 +83,6 @@ def rec_feed(user_id: str, top_k: int = Query(default=10, ge=1, le=100), offset:
             .stream()
         )]
 
-    # Remove dos resultados da engine qualquer post que já está fixado no topo,
-    # evitando duplicatas, e preenche até top_k.
     filtered_ids = [pid for pid in rec_ids if pid not in pinned_set]
     final_ids = (pinned_ids + filtered_ids)[:top_k]
 

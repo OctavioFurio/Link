@@ -23,7 +23,6 @@ PTBR_STOP = {
     "quem","qual","qualquer","outro","outra","mesmo","mesma","então","entao",
     "até","ate","ainda","depois","antes","sempre","nunca","tudo","nada",
     "aqui","lá","la","aquele","aquela","nesse","nessa","neste","nesta",
-    #... Expansível
 }
 
 

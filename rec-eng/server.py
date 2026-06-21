@@ -96,8 +96,8 @@ class _State:
     def __init__(self, space, cand_emb, post_ids, content_by_id):
         self.space        = space
         self.cand_emb     = cand_emb
-        self.post_ids     = post_ids # list[str]
-        self.content_by_id: dict[str, str] = content_by_id  # post_id -> conteúdo sanitizado
+        self.post_ids     = post_ids
+        self.content_by_id: dict[str, str] = content_by_id
 
 _state: _State | None = None
 _state_lock = threading.Lock()
@@ -161,14 +161,12 @@ def _build_profile(user_id: str, state: _State) -> UserProfile:
     saved    = _load_profile(user_id, state.space.vocab_size)
     saved_n  = saved.n if saved is not None else 0
 
-    # refit do tokenizador ocorreu
     if saved is not None and len(saved.vec) != state.space.vocab_size:
         saved   = None
         saved_n = 0
 
     profile = saved if saved is not None else UserProfile(state.space.vocab_size)
 
-    # Só considera o novo
     new_liked_ids = liked_ids[saved_n:]
     for pid in new_liked_ids:
         content = state.content_by_id.get(pid)
@@ -201,8 +199,6 @@ class RecommenderServicer(rec_pb2_grpc.RecommenderServicer):
 
         profile = _build_profile(user_id, state)
 
-        # Pede top_k + offset itens rankeados e descarta os primeiros `offset`,
-        # em vez de re-calcular a mesma janela toda vez.
         fetch_k = top_k + offset
 
         if profile.n == 0:

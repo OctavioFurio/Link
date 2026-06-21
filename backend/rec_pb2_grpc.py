@@ -5,7 +5,7 @@ import warnings
 
 import rec_pb2 as rec__pb2
 
-GRPC_GENERATED_VERSION = '1.80.0'
+GRPC_GENERATED_VERSION = '1.81.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class RecommenderStub(object):
+class RecommenderStub:
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -36,17 +36,17 @@ class RecommenderStub(object):
         """
         self.GetContentFeed = channel.unary_unary(
                 '/rec.Recommender/GetContentFeed',
-                request_serializer=rec__pb2.FeedRequest.SerializeToString,  # type: ignore
-                response_deserializer=rec__pb2.FeedResponse.FromString,     # type: ignore
+                request_serializer=rec__pb2.FeedRequest.SerializeToString,
+                response_deserializer=rec__pb2.FeedResponse.FromString,
                 _registered_method=True)
         self.GetUserSuggestions = channel.unary_unary(
                 '/rec.Recommender/GetUserSuggestions',
-                request_serializer=rec__pb2.UserRequest.SerializeToString,  # type: ignore
-                response_deserializer=rec__pb2.UserResponse.FromString,     # type: ignore
+                request_serializer=rec__pb2.UserRequest.SerializeToString,
+                response_deserializer=rec__pb2.UserResponse.FromString,
                 _registered_method=True)
 
 
-class RecommenderServicer(object):
+class RecommenderServicer:
     """Missing associated documentation comment in .proto file."""
 
     def GetContentFeed(self, request, context):
@@ -66,13 +66,13 @@ def add_RecommenderServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetContentFeed': grpc.unary_unary_rpc_method_handler(
                     servicer.GetContentFeed,
-                    request_deserializer=rec__pb2.FeedRequest.FromString,           # type: ignore
-                    response_serializer=rec__pb2.FeedResponse.SerializeToString,    # type: ignore
+                    request_deserializer=rec__pb2.FeedRequest.FromString,
+                    response_serializer=rec__pb2.FeedResponse.SerializeToString,
             ),
             'GetUserSuggestions': grpc.unary_unary_rpc_method_handler(
                     servicer.GetUserSuggestions,
-                    request_deserializer=rec__pb2.UserRequest.FromString,           # type: ignore
-                    response_serializer=rec__pb2.UserResponse.SerializeToString,    # type: ignore
+                    request_deserializer=rec__pb2.UserRequest.FromString,
+                    response_serializer=rec__pb2.UserResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -82,7 +82,7 @@ def add_RecommenderServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class Recommender(object):
+class Recommender:
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -96,12 +96,12 @@ class Recommender(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(       # type: ignore
+        return grpc.experimental.unary_unary(
             request,
             target,
             '/rec.Recommender/GetContentFeed',
-            rec__pb2.FeedRequest.SerializeToString, # type: ignore
-            rec__pb2.FeedResponse.FromString,       # type: ignore
+            rec__pb2.FeedRequest.SerializeToString,
+            rec__pb2.FeedResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -123,12 +123,12 @@ class Recommender(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(       # type: ignore
+        return grpc.experimental.unary_unary(
             request,
             target,
             '/rec.Recommender/GetUserSuggestions',
-            rec__pb2.UserRequest.SerializeToString, # type: ignore
-            rec__pb2.UserResponse.FromString,       # type: ignore
+            rec__pb2.UserRequest.SerializeToString,
+            rec__pb2.UserResponse.FromString,
             options,
             channel_credentials,
             insecure,

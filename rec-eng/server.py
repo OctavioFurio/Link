@@ -191,6 +191,7 @@ class RecommenderServicer(rec_pb2_grpc.RecommenderServicer):
     def GetContentFeed(self, request, context):
         user_id = request.user_id
         top_k   = request.top_k or 10
+        offset  = max(0, request.offset)
 
         try:
             state = _get_state()
@@ -200,17 +201,23 @@ class RecommenderServicer(rec_pb2_grpc.RecommenderServicer):
 
         profile = _build_profile(user_id, state)
 
+        # Pede top_k + offset itens rankeados e descarta os primeiros `offset`,
+        # em vez de re-calcular a mesma janela toda vez.
+        fetch_k = top_k + offset
+
         if profile.n == 0:
-            recs = [(pid, 0.0) for pid in state.post_ids[-top_k:][::-1]]
+            recs = [(pid, 0.0) for pid in state.post_ids[-fetch_k:][::-1]]
         else:
             liked_ids = frozenset(_liked_post_ids(user_id))
             recs = recommend(
                 profile,
                 state.cand_emb,
                 state.post_ids,
-                top_k=top_k,
+                top_k=fetch_k,
                 deprioritize_ids=liked_ids,
             )
+
+        recs = recs[offset:]
 
         return rec_pb2.FeedResponse(
             post_ids=[pid for pid, _ in recs],

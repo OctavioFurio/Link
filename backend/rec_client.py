@@ -15,9 +15,9 @@ _STUB    = rec_pb2_grpc.RecommenderStub(_CHANNEL)
 _TIMEOUT = float(os.getenv("REC_TIMEOUT_SEC", "2.0"))
 
 
-def get_feed(user_id: str, top_k: int = 10) -> list[str]:
+def get_feed(user_id: str, top_k: int = 10, offset: int = 0) -> list[str]:
     resp = _STUB.GetContentFeed(
-        rec_pb2.FeedRequest(user_id=user_id, top_k=top_k),
+        rec_pb2.FeedRequest(user_id=user_id, top_k=top_k, offset=offset),
         timeout=_TIMEOUT,
     )
     return list(resp.post_ids)

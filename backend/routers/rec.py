@@ -52,7 +52,7 @@ def rec_feed(user_id: str, top_k: int = Query(default=10, ge=1, le=100), offset:
             Lista de publicações recomendadas.
     """
     try:
-        ids = get_feed(user_id, top_k)
+        ids = get_feed(user_id, top_k, offset)
     except Exception:
         ids = [d.id for d in (
             col("posts")

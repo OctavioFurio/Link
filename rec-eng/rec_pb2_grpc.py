@@ -5,7 +5,7 @@ import warnings
 
 import rec_pb2 as rec__pb2
 
-GRPC_GENERATED_VERSION = '1.80.0'
+GRPC_GENERATED_VERSION = '1.81.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class RecommenderStub(object):
+class RecommenderStub:
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -46,7 +46,7 @@ class RecommenderStub(object):
                 _registered_method=True)
 
 
-class RecommenderServicer(object):
+class RecommenderServicer:
     """Missing associated documentation comment in .proto file."""
 
     def GetContentFeed(self, request, context):
@@ -82,7 +82,7 @@ def add_RecommenderServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class Recommender(object):
+class Recommender:
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod

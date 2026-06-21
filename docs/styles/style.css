@@ -70,7 +70,7 @@ input:user-invalid {
     border-color: var(--danger-color);
 }
 
-button, #profile-btn{
+button, #profile-btn, a.btn-icon {
     padding: 0.45rem 1rem;
     cursor: pointer;
     font-weight: bold;
@@ -84,7 +84,7 @@ button, #profile-btn{
     white-space: nowrap;
     text-decoration: none;
 }
-button:hover, #profile-btn:hover {
+button:hover, #profile-btn:hover, a.btn-icon:hover {
     background: transparent;
     color: var(--main-color);
 }

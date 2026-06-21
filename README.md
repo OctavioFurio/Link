@@ -5,19 +5,128 @@ Trabalho exclusivamente para fins acadêmicos, feito por Murilo M. Grosso e Oct�
 ## Arquitetura do Sitema
 ```mermaid
 graph TD
-    FE[<b>Front-end</b><br><i>HTML/CSS/JS<br>Github Pages] <-->|REST API| API
+    FE[<b>Front-end</b><br><i>HTML/CSS/JS<br/>GitHub Pages</i>] <-->|REST/HTTPS| API
 
-    API[<b>Aplicação / Back-end</b><br><i>Python + FastAPI]
-    
-    Base[(<b>Banco de Dados</b><br><i>Firebase)]
-    API <-->|Dados| Base
+    API[<b>Aplicação / Back-end</b><br><i>Python + FastAPI<br/>Render Web Service</i>]
 
-    API <-->|gRPC| ENG[<b>Engine de Recomendação]
+    ENG[<b>Engine de Recomendação</b><br><i>Render Private Service</i>]
+
+    Base[(<b>Firebase</b><br><i>Firestore</i>)]
+
+    API <-->|gRPC| ENG
+    API <-->|Firebase Admin SDK / Firestore client| Base
+    ENG <-->|Firebase Admin SDK / Firestore client| Base
+
+    linkStyle default interpolate linear
 ```
 
 ## Front-end
-
-Escrever aqui...
+ 
+Interface construída com **HTML5, CSS3 e JavaScript** (padrão), hospedada via **GitHub Pages**.
+ 
+> Dado que GitHub Pages serve apenas conteúdo estático, a interatividade vem do JS, que consome a API REST descrita na seção [Back-end](#back-end).
+ 
+---
+ 
+### Páginas
+ 
+| Página | Descrição |
+|---|---|
+| **Login** | Autenticação e Login/Cadastro via formulário |
+| **Feed** | Publicações recomendadas + sugestões de usuários para seguir |
+| **Perfil** | Avatar customizável (Mink), biografia e estatísticas |
+ 
+---
+ 
+### Scripts
+ 
+| Módulo | Responsabilidade |
+|---|---|
+| `utils.js` | Requisições à API, toast de notificações, formatação de tempo relativo, sanitização anti-XSS, sessão (`localStorage`) |
+| `login.js` | Autenticação e redirecionamento |
+| `feed.js` | Feed, paginação por scroll infinito, curtidas, seguir, busca de usuários |
+| `chat.js` | Widget de bate-papo |
+| `mink.js` | Renderização do avatar em `<canvas>`, composição de camadas e colorização destas |
+| `profile.js` | Edição de perfil (cores da Mink, bio) e exibição de estatísticas (seguidores, seguindo, total de curtidas) |
+ 
+---
+ 
+### Login
+ 
+**Estrutura:** `<main>` com `<form>` (validação nativa do navegador) // `#toast` // `<footer>`
+ 
+**Endpoints consumidos:** `POST /auth/signin` & `POST /auth/signup`
+ 
+> Sessão com (`user_id`, `username`) em `localStorage` se sucesso.
+ 
+---
+ 
+### Feed
+ 
+**Estrutura:** `<header>` (logotipo, `<nav>`, busca, login, (botão de sair, se logado)) // `<main>` & `<aside>` (sugestões de perfis) // widget de chat // `#toast` // `<footer>`
+ 
+**Endpoints consumidos:**
+ 
+| Ação | Endpoint |
+|---|---|
+| Carregar feed | `GET /rec/feed/{user_id}` |
+| Carregar sugestões de perfis | `GET /rec/users/{user_id}` |
+| Curtir / descurtir | `POST` / `DELETE /posts/{post_id}/like` |
+| Buscar usuários | `GET /users/search/{query}` |
+| Seguir (ou deixar de seguir) usuário | `POST` / `DELETE /{user_id}/follow` |
+ 
+**Fluxo de carregamento:**
+```
+1. GET /rec/feed/{user_id}        IDs ordenados pela engine de recomendação (caso contrário, mais recentes)
+2. Render imediato                Usa temp_username cacheado no doc do post (Firestore)
+3. GET /users/{user_id}/profile   Async, em background: patch de username temporário (2) + cores do Mink
+4. Scroll infinito                TOP_K_FEED = 10, novo lote via parâmetro offset (atualizado após scroll)
+```
+ 
+> Trade-off: o passo 3 reduz a latência percebida, porém com risco de discrepâncias entre o nome exibido e o nome atual do autor.
+ 
+---
+ 
+### Perfil
+ 
+**Estrutura:** `<header>` // `<main>` // widget de chat // `#toast` // `<footer>`
+ 
+**Endpoints consumidos:**
+ 
+| Ação | Endpoint |
+|---|---|
+| Ler / atualizar cores do Mink | `GET` / `PUT /users/{user_id}/colors` |
+| Ler / atualizar bio | `GET` / `PUT /users/{user_id}/bio` |
+| Curtidas recebidas | `GET /users/{user_id}/likes_received` |
+| Seguidores / seguindo | `GET /users/{user_id}/followers` & `GET /users/{user_id}/followings` |
+| Publicações do usuário | `GET /posts/user/{user_id}` |
+ 
+---
+ 
+### Chat (widget)
+ 
+Presente nas páginas Feed e Perfil, para permitir conversas privadas entre usuários.
+ 
+**Endpoints consumidos:**
+ 
+| Ação | Endpoint |
+|---|---|
+| Listar as conversas | `GET /chat/conversations/{user_id}` |
+| Carregar todas as mensagens | `GET /chat/messages` |
+| Enviar nova mensagem | `POST /chat/message` |
+ 
+**Fluxo:**
+- Lista de contatos = (usuários seguidos) ∪ (usuários com histórico de conversa).
+- Carregamento usa o ID da última mensagem conhecida como cursor, buscando apenas mensagens novas (para reduzir leituras no Firestore)
+- **Sem polling automático:** a ideia inicial usava short-polling, mas foi descartada pelo limite de leituras diárias do plano gratuito do Firestore. A atualização agora é manual, disparada por (1) abertura da aba de chat ou (2) ação explícita do usuário para checar novas mensagens.
+---
+ 
+### Componentes compartilhados
+ 
+- **`#toast`** — notificação temporária (por 2s, alertando sobre curtidas, login, erros e atualizações), oculta por padrão, instanciada uma única vez por página.
+- **Ícones SVG inline** — coleção [Feather](https://feathericons.com/), em vez de `<img>`, permitindo recolorização em tempo real via CSS/JS.
+- **CSS compartilhado** — uma única folha de estilo entre as três páginas, com variáveis globais em `:root` (paleta de cores, tipografia et cetera).
+- Scripts incluídos ao final do `<body>`, garantindo DOM pronto antes da execução.
 
 ## Back-end
 
@@ -52,7 +161,7 @@ Autentica um usuário existente.
 { "user_id": "uuid", "username": "string" }
 ```
 
-**Erros:** `404` usuário não encontrado · `401` senha incorreta
+**Erros:** `404` usuário não encontrado & `401` senha incorreta
 
 ---
 
@@ -71,7 +180,7 @@ Cria uma nova conta.
 
 **Erros:** `409` username já em uso
 
-> A senha é armazenada como hash SHA-256 com salt aleatório. Nunca é retornada pela API.
+> A senha é armazenada como hash SHA-256 com salt aleatório. **Nunca** é retornada pela API.
 
 ---
 
@@ -80,7 +189,7 @@ Cria uma nova conta.
 #### GET `/users/search/{query}`
 Busca usuários cujo username começa com `query`.
 
-**Query params:** `top_k` (padrão: 5, máx: 50)
+**Params da Query:** `top_k` (padrão: 5)
 
 **Resposta:** lista de objetos de usuário (sem campos sensíveis).
 
@@ -91,7 +200,7 @@ Retorna dados públicos de um usuário.
 
 **Resposta:**
 ```json
-{ "user_id": "uuid", "username": "string", "bio": "string", "mink_colors": [0..255 × 9] }
+{ "user_id": "uuid", "username": "string", "bio": "string", "mink_colors": [0..255 x 9] }
 ```
 
 ---
@@ -106,7 +215,7 @@ Retorna a paleta de cores do Mink do usuário.
 
 **Resposta:**
 ```json
-{ "mink_colors": [r, g, b, r, g, b, r, g, b] }
+{ "mink_colors": [r1, g1, b1, r2, g2, b2, r3, g3, b3] }
 ```
 
 > Array de 9 inteiros (0–255) representando 3 cores RGB: pelo secundário, pelo principal e fundo/olhos.
@@ -118,7 +227,7 @@ Atualiza a paleta de cores do Mink.
 
 **Body:**
 ```json
-{ "colors": [r, g, b, r, g, b, r, g, b] }
+{ "colors": [r1', g1', b1', r2', g2', b2', r3', g3', b3'] }
 ```
 
 ---
@@ -249,7 +358,7 @@ Envia uma mensagem para outro usuário (máx. 256 caracteres).
 #### GET `/chat/messages`
 Retorna as mensagens de uma conversa, em ordem cronológica.
 
-**Query params:**
+**Params da Query:**
 
 | Param | Tipo | Padrão | Máx |
 |---|---|---|---|
@@ -271,14 +380,14 @@ Lista os IDs dos usuários com quem `user_id` já trocou mensagens.
 #### GET `/rec/feed/{user_id}`
 Retorna publicações recomendadas para o usuário. Usa um serviço externo de recomendação; em caso de falha, cai para as publicações mais recentes.
 
-**Query params:** `top_k` (padrão: 10) · `offset` (padrão: 0)
+**Params da Query:** `top_k` (padrão: 10) · `offset` (padrão: 0)
 
 ---
 
 #### GET `/rec/users/{user_id}`
 Retorna sugestões de usuários para seguir. Também usa o serviço de recomendação com fallback para os primeiros usuários cadastrados.
 
-**Query params:** `top_k` (padrão: 5)
+**Params da Query:** `top_k` (padrão: 5)
 
 ## Database
 

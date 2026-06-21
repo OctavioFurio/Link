@@ -150,11 +150,15 @@ async function loadFeed(reset = false) {
             return;
         }
 
-        const likedIds = IS_LOGGED
-            ? await apiFetch(`/users/${USER_ID}/likes`)
-            : [];
+        const [likedIds, followingIds] = IS_LOGGED
+            ? await Promise.all([
+                apiFetch(`/users/${USER_ID}/likes`),
+                apiFetch(`/users/${USER_ID}/followings`),
+            ])
+            : [[], []];
 
         const likedSet = new Set(likedIds);
+        const followingSet = new Set(followingIds);
 
         if (reset)
             container.innerHTML = "";
@@ -174,16 +178,15 @@ async function loadFeed(reset = false) {
         posts.forEach(async (post, i) => {
             try {
                 const profile = await apiFetch(`/users/${post.user_id}/profile`);
+                updatePostUsername(postElements[i], profile.username);
+                drawPostMink(postElements[i].querySelector(".post-mink"), profile.mink_colors);
 
-                updatePostUsername(
-                    postElements[i],
-                    profile.username
-                );
-
-                drawPostMink(
-                    postElements[i].querySelector(".post-mink"),
-                    profile.mink_colors
-                );
+                const followBtn = postElements[i].querySelector(".follow-btn");
+                if (followBtn) {
+                    const already = followingSet.has(post.user_id);
+                    followBtn.classList.toggle("following", already);
+                    followBtn.textContent = already ? "Seguindo" : "Seguir";
+                }
             } catch {}
         });
 
@@ -231,9 +234,10 @@ function setFeedMessage(container, message) {
  * @param {boolean} [liked=false] - Se o usuário autenticado já curtiu o post.
  * @returns {HTMLElement} Elemento `<article>` do post pronto para inserção no DOM.
  */
-function renderPost(post, username, liked=false) {
+function renderPost(post, username, liked = false) {
     const card = document.createElement("article");
     card.className = "post-card";
+    const proprio = post.user_id === USER_ID;
 
     card.innerHTML = `
         <div class="post-meta">
@@ -250,13 +254,22 @@ function renderPost(post, username, liked=false) {
                         data-likes="${post.likes_count}">
                     ${liked ? "♥" : "♡"} ${post.likes_count}
                 </button>
+                ${!proprio ? `
+                    <button class="follow-btn"
+                            data-id="${post.user_id}"
+                            style="margin-left:auto">
+                        Seguir
+                    </button>
+                ` : ""}
             </div>
         ` : ""}
     `;
 
     if (IS_LOGGED) {
-        card.querySelector(".like-btn")?.addEventListener("click", (e) => 
+        card.querySelector(".like-btn")?.addEventListener("click", e =>
             toggleLike(e.currentTarget));
+        card.querySelector(".follow-btn")?.addEventListener("click", e =>
+            toggleFollow(e.currentTarget));
     }
     return card;
 }

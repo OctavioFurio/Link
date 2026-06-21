@@ -521,3 +521,5 @@ function handleInputCounter() {
         charCount.style.fontWeight = "normal";
     }
 }
+
+document.getElementById("exit-btn").addEventListener("click", handleExit);

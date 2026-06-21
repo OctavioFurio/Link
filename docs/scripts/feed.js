@@ -178,8 +178,15 @@ async function loadFeed(reset = false) {
         posts.forEach(async (post, i) => {
             try {
                 const profile = await apiFetch(`/users/${post.user_id}/profile`);
-                updatePostUsername(postElements[i], profile.username);
-                drawPostMink(postElements[i].querySelector(".post-mink"), profile.mink_colors);
+                updatePostUsername(
+                    postElements[i], 
+                    profile.username
+                );
+
+                drawPostMink(
+                    postElements[i].querySelector(".post-mink"), 
+                    profile.mink_colors
+                );
 
                 const followBtn = postElements[i].querySelector(".follow-btn");
                 if (followBtn) {

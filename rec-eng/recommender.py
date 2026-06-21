@@ -160,18 +160,23 @@ class UserProfile:
 
 def recommend(
         user: UserProfile,
-        candidate_embeddings,          
+        candidate_embeddings,
         candidate_ids: list,
         top_k: int = 10,
-        exclude_ids: frozenset = frozenset(),
+        deprioritize_ids: frozenset = frozenset(),
 ) -> list[tuple]:
+    """
+    Itens em `deprioritize_ids` (ex.: posts já curtidos) não são
+    removidos do resultado — apenas empurrados para o final da
+    lista, atrás de todo o conteúdo ainda não visto. Isso evita
+    que o feed fique vazio quando o usuário já curtiu tudo que
+    existe na base.
+    """
     # .dot() por ser esparço
     sims = np.asarray(candidate_embeddings.dot(user.vec)).ravel()
-    out = []
+    fresh, seen = [], []
     for i in np.argsort(-sims):
-        if candidate_ids[i] in exclude_ids:
-            continue
-        out.append((candidate_ids[i], float(sims[i])))
-        if len(out) >= top_k:
-            break
-    return out
+        item   = (candidate_ids[i], float(sims[i]))
+        bucket = seen if candidate_ids[i] in deprioritize_ids else fresh
+        bucket.append(item)
+    return (fresh + seen)[:top_k]

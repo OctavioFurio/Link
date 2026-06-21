@@ -209,7 +209,7 @@ class RecommenderServicer(rec_pb2_grpc.RecommenderServicer):
                 state.cand_emb,
                 state.post_ids,
                 top_k=top_k,
-                exclude_ids=liked_ids,
+                deprioritize_ids=liked_ids,
             )
 
         return rec_pb2.FeedResponse(

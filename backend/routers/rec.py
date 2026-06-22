@@ -34,29 +34,21 @@ def rec_feed(user_id: str, top_k: int = Query(default=10, ge=1, le=100), offset:
     """
     Retorna publicações recomendadas para um usuário.
 
-    Na primeira página (offset == 0), os posts mais recentes do próprio
-    usuário são injetados no topo, garantindo visibilidade imediata de
-    publicações recém-criadas — que ainda não foram indexadas pela engine
-    de recomendação.
+    Na primeira página os posts mais recentes do próprio usuário são injetados
+    no topo, garantindo visibilidade de publicações recém-criadas que ainda não 
+    foram indexadas pela engine de recomendação (adição pós teste de usabilidade). 
 
-    As recomendações são solicitadas à engine de
-    recomendação. Caso o serviço esteja
-    indisponível, são retornadas as publicações mais
-    recentes cadastradas na plataforma.
+    As recomendações são solicitadas à engine de recomendação. 
+    Caso o serviço esteja indisponível, são retornadas as publicações mais
+    recentes cadastradas, como fallback.
 
     Args:
-        user_id:
-            Identificador do usuário.
-
-        top_k:
-            Quantidade máxima de publicações retornadas.
-
-        offset:
-            Deslocamento utilizado no feed.
+        user_id: Identificador do usuário.
+        top_k: Quantidade máxima de publicações retornadas.
+        offset: Deslocamento utilizado no feed (scroll infinito).
 
     Returns:
-        list:
-            Lista de publicações recomendadas.
+        list: Lista de publicações recomendadas.
     """
     pinned_ids: list[str] = []
     if offset == 0:
@@ -94,21 +86,16 @@ def rec_users(user_id: str, top_k: int = Query(default=5, ge=1, le=50)):
     """
     Retorna sugestões de usuários para seguir.
 
-    As recomendações são obtidas através da engine de
-    recomendação. Caso o serviço esteja
-    indisponível, são retornados os primeiros usuários
-    cadastrados no sistema.
+    As recomendações são obtidas através da engine de recomendação.
+    Caso o serviço esteja indisponível, são retornados os primeiros 
+    usuários cadastrados no sistema, como fallback.
 
     Args:
-        user_id:
-            Identificador do usuário.
-
-        top_k:
-            Quantidade máxima de sugestões retornadas.
+        user_id: Identificador do usuário.
+        top_k: Quantidade máxima de sugestões retornadas.
 
     Returns:
-        list:
-            Lista de usuários recomendados.
+        list: Lista de usuários recomendados.
     """
     try:
         ids = get_user_suggestions(user_id, top_k)

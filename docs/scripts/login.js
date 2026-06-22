@@ -78,7 +78,7 @@ async function handleSubmit(action) {
         }, LOGIN_TIMER_MS);
 
     } catch (error) {
-        console.error("Auth error:", error);
+        console.error("Erro auth:", error);
         toast(actionTexts.fail);
     } finally {
         btn.disabled = false;

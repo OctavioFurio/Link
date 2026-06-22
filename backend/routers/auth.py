@@ -12,7 +12,6 @@ Autores:
     Murilo M. Grosso
 """
 
-
 import uuid
 
 from fastapi import APIRouter, HTTPException

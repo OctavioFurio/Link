@@ -1,5 +1,5 @@
 """
-Client para a engine de recomendação.
+Client gRPC para a engine de recomendação.
 
 Autores:
     Octávio X. Fúrio

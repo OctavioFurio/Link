@@ -13,7 +13,6 @@ Autores:
     Murilo M. Grosso
 """
 
-
 import uuid
 
 from fastapi import APIRouter, HTTPException, Query
@@ -89,26 +88,17 @@ def get_messages(
     limitadas pela quantidade especificada.
 
     Args:
-        user_a: 
-            ID do usuário A.
-
-        user_b: 
-            ID do usuário B.
-            
-        limit: 
-            Quantidade máxima de mensagens retornadas
-            (máximo de 100).
-
-        after:
-            ID da última mensagem já conhecida pelo cliente.
+        user_a: ID do usuário A.
+        user_b: ID do usuário B.
+        limit: Quantidade máxima de mensagens retornadas.
+        after: ID da última mensagem já conhecida pelo cliente.
             Quando informado, retorna apenas as mensagens
-            posteriores a ela, reduzindo o tráfego no refresh.
+            posteriores a ela, reduzindo o tráfego.
 
     Returns:
         list:
             Lista de mensagens ordenadas pela data de envio.
     """
-
     conv_ref = col("chats").document(chat_id(user_a, user_b))
     query = conv_ref.collection("messages").order_by("created_at", direction="DESCENDING")
 

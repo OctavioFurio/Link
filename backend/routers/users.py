@@ -49,21 +49,16 @@ Prefixo:
 @router.get("/search/{query}")
 def search_users(query: str, top_k: int = Query(default=5, ge=1, le=50)):
     """
-    Busca usuários pelo início do nome de usuário.
+    Busca usuários pelo início do nome de usuário (prefix-search).
 
-    A pesquisa retorna usuários cujo username começa
-    com o texto informado.
+    A pesquisa retorna usuários cujo username começa com o texto informado.
 
     Args:
-        query:
-            Texto utilizado na busca.
-
-        top_k:
-            Quantidade máxima de resultados retornados.
+        query:Texto utilizado na busca.
+        top_k: Quantidade máxima de resultados retornados.
 
     Returns:
-        list:
-            Lista de usuários encontrados.
+        list: Lista de usuários encontrados.
     """
     docs = (
         col("users")
@@ -80,16 +75,13 @@ def get_user_profile(user_id: str):
     """
     Retorna dados públicos e cores do Mink de um usuário.
 
-    Combina as informações de perfil e paleta de cores em
-    uma única requisição, evitando chamadas separadas no feed.
+    Combina as informações de perfil e paleta de cores em uma única requisição.
 
     Args:
-        user_id:
-            Identificador do usuário.
+        user_id: Identificador do usuário.
 
     Returns:
-        dict:
-            Username e cores do Mink do usuário.
+        dict: Username e cores do Mink do usuário.
     """
     data = (get_doc("users", user_id).to_dict() or {})
     return {
@@ -105,12 +97,10 @@ def get_user(user_id: str):
     Retorna os dados públicos de um usuário.
 
     Args:
-        user_id:
-            Identificador do usuário.
+        user_id: Identificador do usuário.
 
     Returns:
-        dict:
-            Dados do perfil do usuário.
+        dict: Dados do perfil do usuário.
     """
     return user_dict(get_doc("users", user_id))
 
@@ -121,12 +111,10 @@ def delete_user(user_id: str):
     Remove um usuário do sistema.
 
     Args:
-        user_id:
-            Identificador do usuário.
+        user_id: Identificador do usuário a ser removido.
 
     Returns:
-        dict:
-            Resposta de sucesso.
+        dict: Resposta de sucesso.
     """
     get_doc("users", user_id)
     col("users").document(user_id).delete()
@@ -139,8 +127,7 @@ def get_colors(user_id: str):
     Retorna a paleta de cores do Mink.
 
     Returns:
-        dict:
-            Vetor contendo 9 valores RGB.
+        dict: Vetor contendo 9 valores RGB.
     """
     return {"mink_colors": (get_doc("users", user_id).to_dict() or {}).get("mink_colors")}
 
@@ -151,12 +138,10 @@ def set_colors(user_id: str, body: ColorsIn):
     Atualiza a paleta de cores do Mink.
 
     Args:
-        body (ColorsIn):
-            Nova configuração de cores.
+        body (ColorsIn): Nova configuração de cores.
 
     Returns:
-        dict:
-            Resposta de sucesso.
+        dict: Resposta de sucesso.
     """
     get_doc("users", user_id)
     col("users").document(user_id).update({"mink_colors": body.colors})
@@ -169,12 +154,10 @@ def get_likes(user_id: str):
     Retorna as publicações curtidas por um usuário.
 
     Args:
-        user_id:
-            Identificador do usuário.
+        user_id: Identificador do usuário.
 
     Returns:
-        list:
-            Lista de IDs das publicações curtidas.
+        list: Lista de IDs das publicações curtidas.
     """
     return [d.to_dict()["post_id"] for d in col("likes").where("user_id", "==", user_id).stream()]
 
@@ -185,8 +168,7 @@ def get_followings(user_id: str):
     Retorna os usuários seguidos por um usuário.
 
     Returns:
-        list:
-            Lista de IDs dos usuários seguidos.
+        list: Lista de IDs dos usuários seguidos.
     """
     return [d.to_dict()["followed_id"] for d in col("follows").where("follower_id", "==", user_id).stream()]
 
@@ -197,23 +179,18 @@ def follow(user_id: str, body: FollowIn):
     Segue outro usuário.
 
     Args:
-        user_id:
-            Usuário que deseja seguir.
-
-        body (FollowIn):
-            Usuário a ser seguido.
+        user_id: Usuário que deseja seguir.
+        body (FollowIn): Usuário a ser seguido.
 
     Returns:
-        dict:
-            Resposta de sucesso.
+        dict: Resposta de sucesso.
 
     Raises:
-        HTTPException(409):
-            Já segue o usuário.
+        HTTPException(409): Já segue o usuário.
     """
     ref = col("follows").document(f"{user_id}_{body.user_id}")
     if ref.get().exists:
-        raise HTTPException(409, "Already following")
+        raise HTTPException(409, "Ja segue")
     ref.set({"follower_id": user_id, "followed_id": body.user_id, "created_at": SERVER_TIMESTAMP})
     return OK
 
@@ -224,8 +201,7 @@ def get_followers(user_id: str):
     Retorna os seguidores de um usuário.
 
     Returns:
-        list:
-            Lista de IDs dos seguidores.
+        list: Lista de IDs dos seguidores.
     """
     return [
         d.to_dict()["follower_id"]
@@ -241,23 +217,18 @@ def unfollow(user_id: str, body: FollowIn):
     Deixa de seguir outro usuário.
 
     Args:
-        user_id:
-            Usuário que está deixando de seguir.
-
-        body (FollowIn):
-            Usuário que deixará de ser seguido.
+        user_id: Usuário que está deixando de seguir.
+        body (FollowIn): Usuário que deixará de ser seguido.
 
     Returns:
-        dict:
-            Resposta de sucesso.
+        dict: Resposta de sucesso.
 
     Raises:
-        HTTPException(404):
-            Não segue o usuário.
+        HTTPException(404): Não segue o usuário.
     """
     ref = col("follows").document(f"{user_id}_{body.user_id}")
     if not ref.get().exists:
-        raise HTTPException(404, "Not following")
+        raise HTTPException(404, "Nao seguindo")
     ref.delete()
     return OK
 
@@ -265,18 +236,16 @@ def unfollow(user_id: str, body: FollowIn):
 @router.get("/{user_id}/likes_received")
 def likes_received(user_id: str):
     """
-    Calcula o total de curtidas recebidas por um usuário.
+    Calcula o total de curtidas recebidas por um usuário (para perfil).
 
     O valor corresponde à soma das curtidas de todas
     as publicações pertencentes ao usuário.
 
     Args:
-        user_id:
-            Identificador do usuário.
+        user_id: Identificador do usuário.
 
     Returns:
-        dict:
-            Quantidade total de curtidas recebidas.
+        dict: Quantidade total de curtidas recebidas.
     """
     total = 0
 
@@ -299,12 +268,10 @@ def set_user_bio(user_id: str, body: BioIn):
     configurado pela aplicação.
 
     Args:
-        body (BioIn):
-            Nova biografia.
+        body (BioIn): Nova biografia.
 
     Returns:
-        dict:
-            Resposta de sucesso.
+        dict: Resposta de sucesso.
     """
     get_doc("users", user_id)
     col("users").document(user_id).update({"bio": body.bio.strip()[:MAX_LEN]})
@@ -317,8 +284,7 @@ def get_user_bio(user_id: str):
     Retorna a biografia de um usuário.
 
     Returns:
-        dict:
-            Conteúdo da biografia.
+        dict: Conteúdo da biografia.
     """
     doc = get_doc("users", user_id)
     return {"bio": (doc.to_dict() or {}).get("bio", "")}

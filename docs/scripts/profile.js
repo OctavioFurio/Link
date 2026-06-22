@@ -257,4 +257,5 @@ async function loadProfileStats() {
 loadProfileStats();
 
 if (USER_ID) initChat(USER_ID);
-	document.getElementById("exit-btn").addEventListener("click", handleExit);
+
+document.getElementById("exit-btn").addEventListener("click", handleExit);

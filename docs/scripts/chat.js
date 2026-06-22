@@ -113,12 +113,12 @@ function initChat(userId) {
     /**
      * Busca mensagens da conversa ativa.
      *
-     * Quando `full` é `false`, usa `lastMessageId` para buscar
-     * apenas mensagens novas. Quando `full` é `true`, recarrega 
+     * Quando full é false, usa lastMessageId para buscar
+     * apenas mensagens novas. Quando full é true, recarrega 
      * toda a conversa do início.
      *
      * @async
-     * @param {boolean} [full=false] - Se `true`, recarrega todas as mensagens.
+     * @param {boolean} [full=false] - Se true, recarrega todas as mensagens.
      * @returns {Promise<void>}
      */
     async function loadMessages(full = false) {
@@ -136,11 +136,11 @@ function initChat(userId) {
      * Renderiza mensagens no painel da conversa.
      *
      * Em modo incremental, acrescenta as mensagens ao final do DOM.
-     * Em modo completo (`full`), limpa o painel antes de renderizar.
+     * Em modo completo (full), limpa o painel antes de renderizar.
      * Mantém o scroll no fundo se o usuário já estava lá.
      *
      * @param {Object[]} msgs - Lista de mensagens retornadas pela API.
-     * @param {boolean} [full=false] - Se `true`, limpa o painel antes de renderizar.
+     * @param {boolean} [full=false] - Se true, limpa o painel antes de renderizar.
      * @returns {void}
      */
     function renderMessages(msgs, full = false) {

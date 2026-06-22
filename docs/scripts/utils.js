@@ -14,7 +14,7 @@ const TOAST_TIMER_MS = 2000;
  * Realiza uma requisição autenticada à API e retorna o JSON da resposta.
  *
  * @param {string} path - Caminho do endpoint, relativo à URL base da API.
- * @param {RequestInit} [options] - Opções repassadas ao `fetch`.
+ * @param {RequestInit} [options] - Opções repassadas ao fetch.
  * @returns {Promise<any>} Dados retornados pela API.
  * @throws {Error} Se a resposta HTTP indicar falha.
  */
@@ -29,7 +29,7 @@ function apiFetch(path, options) {
  * Escapa caracteres especiais HTML para evitar XSS.
  *
  * @param {string} s - String a ser modificada.
- * @returns {string} String com `&`, `<` e `>` substituídos pelas entidades HTML correspondentes.
+ * @returns {string} String com &, < e > substituídos pelas entidades HTML correspondentes.
  */
 function escHtml(s) {
     return s
@@ -41,7 +41,7 @@ function escHtml(s) {
 /**
  * Exibe uma notificação temporária na tela.
  *
- * Localiza o elemento `#toast`, define seu texto e o torna
+ * Localiza o elemento #toast, define seu texto e o torna
  * visível por {@link TOAST_TIMER_MS} milissegundos.
  *
  * @param {string} message - Mensagem a ser exibida.

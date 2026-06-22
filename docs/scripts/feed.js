@@ -107,12 +107,12 @@ function updateProfBtn() {
 /**
  * Carrega e exibe posts do feed recomendado.
  *
- * Suporta paginação via scroll infinito. Quando `reset` é `true`,
+ * Suporta paginação via scroll infinito. Quando reset é true,
  * reinicia o offset e limpa o container antes de renderizar.
  * Busca o perfil de cada autor em paralelo para atualizar nome e Mink.
  *
  * @async
- * @param {boolean} [reset=false] - Se `true`, reinicia o feed do início.
+ * @param {boolean} [reset=false] - Se true, reinicia o feed do início.
  * @returns {Promise<void>}
  */
 async function loadFeed(reset = false) {
@@ -239,7 +239,7 @@ function setFeedMessage(container, message) {
  * @param {Object} post - Dados do post retornados pela API.
  * @param {string} username - Nome em cache de usuário a exibir.
  * @param {boolean} [liked=false] - Se o usuário autenticado já curtiu o post.
- * @returns {HTMLElement} Elemento `<article>` do post pronto para inserção no DOM.
+ * @returns {HTMLElement} Elemento <article> do post pronto para inserção no DOM.
  */
 function renderPost(post, username, liked = false) {
     const card = document.createElement("article");
@@ -367,7 +367,7 @@ async function loadSuggestions() {
 /**
  * Exibe uma mensagem de estado dentro de uma lista.
  *
- * @param {HTMLUListElement} list - Elemento `<ul>` alvo.
+ * @param {HTMLUListElement} list - Elemento <ul> alvo.
  * @param {string} message - Texto a ser exibido como item da lista.
  * @returns {void}
  */
@@ -376,13 +376,13 @@ function setListMessage(list, message) {
 }
 
 /**
- * Cria e retorna o elemento `<li>` de um usuário sugerido.
+ * Cria e retorna o elemento <li> de um usuário sugerido.
  *
  * Inclui o nome do usuário e um botão para seguir/deixar de seguir.
  *
  * @param {Object} user - Dados do usuário retornados pela API.
  * @param {boolean} [following=false] - Se o usuário autenticado já segue este usuário.
- * @returns {HTMLLIElement} Elemento `<li>` pronto para inserção no DOM.
+ * @returns {HTMLLIElement} Elemento <li> pronto para inserção no DOM.
  */
 function renderUserLi(user, following=false) {
     const li = document.createElement("li");

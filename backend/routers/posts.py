@@ -41,31 +41,29 @@ def create_post(body: PostIn):
     Cria uma nova publicação.
 
     O conteúdo é validado para garantir que não esteja
-    vazio e que respeite o limite máximo de caracteres.
+    vazio e que respeite o limite de caracteres.
 
     Args:
-        body (PostIn):
-            Dados da publicação.
+        body (PostIn): Dados da publicação.
 
     Returns:
-        dict:
-            Identificador da publicação criada.
+        dict: Identificador da publicação criada.
 
     Raises:
-        HTTPException(400):
-            Conteúdo vazio ou maior que o tamanho limite.
+        HTTPException(400): Conteúdo vazio ou maior que o limite.
     """
     content = body.content.strip()
     if not content or len(content) > MAX_LEN:
-        raise HTTPException(400, "Invalid content")
+        raise HTTPException(400, "Conteudo invalido")
     pid = str(uuid.uuid4())
-    col("posts").document(pid).set({
+    col("posts").document(pid).set(
+        {
         "user_id":       body.user_id,
         "temp_username": body.temp_username,
         "content":       content[:MAX_LEN],
         "likes_count":   0,
         "created_at":    SERVER_TIMESTAMP,
-    })
+        })
     return {"post_id": pid}
 
 
@@ -75,12 +73,10 @@ def get_posts_by_user(user_id: str):
     Retorna todas as publicações de um usuário.
 
     Args:
-        user_id:
-            Identificador do usuário.
+        user_id: Identificador do usuário.
 
     Returns:
-        list:
-            Lista de publicações criadas pelo usuário.
+        list: Lista de publicações criadas pelo usuário.
     """
     docs = (
         col("posts")
@@ -100,12 +96,10 @@ def get_post(post_id: str):
     Retorna uma publicação pelo seu identificador.
 
     Args:
-        post_id:
-            Identificador da publicação.
+        post_id: Identificador da publicação.
 
     Returns:
-        dict:
-            Dados da publicação.
+        dict: Dados da publicação.
     """
     return doc_dict(get_doc("posts", post_id), "post_id")
 
@@ -119,23 +113,18 @@ def like_post(post_id: str, body: LikeIn):
     forma atômica no banco de dados.
 
     Args:
-        post_id:
-            Identificador da publicação.
-
-        body (LikeIn):
-            Dados da curtida.
+        post_id: Identificador da publicação.
+        body (LikeIn): Dados da curtida.
 
     Returns:
-        dict:
-            Resposta de sucesso.
+        dict: Resposta de sucesso.
 
     Raises:
-        HTTPException(409):
-            O usuário já curtiu a publicação.
+        HTTPException(409): O usuário já curtiu a publicação.
     """
     ref = col("likes").document(f"{body.user_id}_{post_id}")
     if ref.get().exists:
-        raise HTTPException(409, "Already liked")
+        raise HTTPException(409, "Ja curtido")
     ref.set({"user_id": body.user_id, "post_id": post_id, "created_at": SERVER_TIMESTAMP})
     col("posts").document(post_id).update({"likes_count": Increment(1)})
     return OK
@@ -150,23 +139,18 @@ def unlike_post(post_id: str, body: LikeIn):
     forma atômica no banco de dados.
 
     Args:
-        post_id:
-            Identificador da publicação.
-
-        body (LikeIn):
-            Dados da curtida a ser removida.
+        post_id: Identificador da publicação.
+        body (LikeIn): Dados da curtida a ser removida.
 
     Returns:
-        dict:
-            Resposta de sucesso.
+        dict: Resposta de sucesso.
 
     Raises:
-        HTTPException(404):
-            Curtida não encontrada.
+        HTTPException(404): Curtida não encontrada.
     """
     ref = col("likes").document(f"{body.user_id}_{post_id}")
     if not ref.get().exists:
-        raise HTTPException(404, "Like not found")
+        raise HTTPException(404, "Like nao encontrado")
     ref.delete()
     col("posts").document(post_id).update({"likes_count": Increment(-1)})
     return OK
